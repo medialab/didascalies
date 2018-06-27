@@ -1,4 +1,6 @@
 data/*
 !data/didascalies.csv
+!data/enriched.csv
 .ipynb_checkpoints
 .DS_Store
+scripts/node_modules
