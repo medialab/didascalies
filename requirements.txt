@@ -2,3 +2,4 @@ fog
 jupyter
 tqdm
 pandas
+vega
