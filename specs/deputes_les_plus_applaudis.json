@@ -1,0 +1,30 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+    "mark": "bar",
+    "transform": [{
+        "filter": "datum.parlementaire !== null"
+    },{
+        "filter": "datum.fonction === null"
+    },{
+        "filter": "datum.applaudi === 'oui'"
+    }],
+    "encoding": {
+        "x": {
+            "field": "parlementaire",
+            "type": "nominal",
+            "sort": {
+                "op": "count", 
+                "field": "parlementaire",
+                "order": "descending"
+            }
+        },
+        "y": {
+            "field": "*",
+            "aggregate": "count",
+            "type": "quantitative"
+        }
+    },
+    "data": {
+      "url": "https://raw.githubusercontent.com/medialab/didascalies/master/data/enriched.csv"
+    }
+}

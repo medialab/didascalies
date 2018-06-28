@@ -1,0 +1,32 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+    "mark": "bar",
+    "transform": [{
+        "filter": "datum.parlementaire_groupe_norme !== null"
+    },{
+        "filter": "datum.parlementaire !== null"
+    }],
+    "encoding": {
+        "x": {
+            "field": "parlementaire_groupe_norme",
+            "type": "nominal",
+            "sort": {
+                "op": "count", 
+                "field": "parlementaire_groupe_norme",
+                "order": "descending"
+            }
+        },
+        "color": {
+            "field": "parlementaire_groupe_norme",
+            "type": "nominal"
+        },
+        "y": {
+            "field": "*",
+            "aggregate": "count",
+            "type": "quantitative"
+        }
+    },
+    "data": {
+      "url": "https://raw.githubusercontent.com/medialab/didascalies/master/data/didascalies.csv"
+    }
+}
