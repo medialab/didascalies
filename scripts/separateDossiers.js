@@ -4,7 +4,7 @@ const path = require('path');
 const slugify = require('slugify');
 
 const DATA_FOLDER = path.resolve(__dirname + '/../data/');
-const OUTPUT_FOLDER = path.resolve(__dirname + '/../analysis/explo/data/');
+const OUTPUT_FOLDER = path.resolve(__dirname + '/../debats/public/data/');
 
 fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
   .then(() => fs.readFile(`${DATA_FOLDER}/dossiers.json`))

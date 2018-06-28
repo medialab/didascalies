@@ -4,3 +4,5 @@ data/*
 .ipynb_checkpoints
 .DS_Store
 scripts/node_modules
+debats/node_modules
+debats/public/data

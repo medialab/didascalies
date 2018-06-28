@@ -4,7 +4,6 @@ const extra = require('fs-extra');
 const fs = require('fs');
 
 const DATA_FOLDER = '../data/';
-const OUTPUT_FOLDER = '../analysis/explo/data/';
 const INPUT_DIDASCALIES = `${DATA_FOLDER}didascalies.csv`;
 const INPUT_INTERVENTIONS = `${DATA_FOLDER}interventions.csv`;
 
@@ -74,4 +73,3 @@ console.log('done nesting');
 
 console.log('writing dossiers.json');
 fs.writeFileSync(`${DATA_FOLDER}dossiers.json`, JSON.stringify(dossiers), 'utf8')
-// console.log(dossiers[0].values);
