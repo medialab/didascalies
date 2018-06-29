@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import TTip from 'react-tooltip';
+import PropTypes from 'prop-types';
 
 import {getFile} from '../utils/client';
  
 import Profile from '../components/Profile';
-
+import Assemblee from '../components/Assemblee';
 
 import {
   Container,
@@ -12,6 +12,11 @@ import {
 } from 'bloomer';
 
 class App extends Component {
+
+  static contextTypes = {
+    listeDeputes: PropTypes.array,
+    placesAssemblee: PropTypes.object,
+  }
 
   constructor(props) {
     super(props);
@@ -53,36 +58,46 @@ class App extends Component {
       state: {
         data,
         dossierName,
+      },
+      context: {
+        listeDeputes,
+        placesAssemblee
       }
     } = this;
 
     return (
       <Container>
         <div>
-        <Title>
-          {dossierName}
-        </Title>
-          {
-            data ?
-              data
-              .seances
-              .map((seance, seanceIndex) => 
-                <div
-                key={seanceIndex} 
-                >
-                  <Title isSize={2}>
-                    Séance {seanceIndex + 1}
-                  </Title>
-                  <Profile
-                  data={seance.interventions} />
-                </div>
-               )
-              
-            :
-              'Chargement'
-          }
-          </div>
-        <TTip place="top" id="annotation" />
+          <Title>
+            {dossierName}
+          </Title>
+            {
+              data ?
+                data
+                .seances
+                .map((seance, seanceIndex) => 
+                  <div
+                  key={seanceIndex} 
+                  >
+                    <Title isSize={2}>
+                      Séance {seanceIndex + 1}
+                    </Title>
+                    <Profile
+                    data={seance.interventions} />
+                  </div>
+                 )
+                
+              :
+                'Chargement'
+            }
+            {
+              listeDeputes && placesAssemblee &&
+              <Assemblee
+                listeDeputes={listeDeputes}
+                placesAssemblee={placesAssemblee}
+              />
+            }
+        </div>
       </Container>
     );
   }

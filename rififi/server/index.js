@@ -7,6 +7,6 @@ const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 
-app.use('/', express.static('data'));
+app.use('/', express.static('data/'));
 
 app.listen(PORT, () => console.log('listening on port', PORT));

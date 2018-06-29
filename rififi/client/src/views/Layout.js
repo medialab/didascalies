@@ -27,18 +27,24 @@ export default class Layout extends Component {
 
   static childContextTypes = {
     dossiers: PropTypes.array,
+    listeDeputes: PropTypes.array,
+    placesAssemblee: PropTypes.object,
   }
 
   constructor(props) {
     super(props);
     this.state = {
       dossiers: [],
-      navIsActive: false
+      listeDeputes: undefined,
+      placesAssemblee: undefined,
+      navIsActive: false,
     };
   }
 
   getChildContext = () => ({
-    dossiers: this.state.dossiers
+    dossiers: this.state.dossiers,
+    listeDeputes: this.state.listeDeputes,
+    placesAssemblee: this.state.placesAssemblee
   })
 
   componentDidMount() {
@@ -46,6 +52,20 @@ export default class Layout extends Component {
       .then(str => {
         this.setState({
           dossiers: str.split('\n').map(s => s.trim())
+        })
+      })
+      .catch(console.error)
+    getFile('/resources/liste-deputes.json')
+      .then(({deputes: listeDeputes}) => {
+        this.setState({
+          listeDeputes 
+        })
+      })
+      .catch(console.error)
+    getFile('/resources/places_assemblee.json')
+      .then(placesAssemblee => {
+        this.setState({
+          placesAssemblee 
         })
       })
       .catch(console.error)
