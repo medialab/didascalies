@@ -194,7 +194,7 @@ NEGATIVE_KEY_WORDS = [
 ];
 
 for d in DIDASCALIES:
-  didasc = d['didascalie']
+  didasc = d['didascalie'].lower()
   ton = None
   for word in POSITIVE_KEY_WORDS:
         if (word in didasc):
