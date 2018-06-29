@@ -1,7 +1,5 @@
 /* TODO
 --------
-- add metas on seance (sommaire, stats didascalies ..)
-- add metrics by seance ?
 - add metrics by dossier
 - filter dossiers nearly empty/non legislative (no id_an)
 - lighten data by removing redundancy field
@@ -31,7 +29,9 @@ const addSeance = function(seances, s) {
 fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
   .then(() => fs.readFile(`${DATA_FOLDER}/dossiers.json`))
   .then(dossiers => Promise.all(
-    JSON.parse(dossiers).map(dossier => {
+    JSON.parse(dossiers)
+    .filter(dossier => dossiersMap[dossier.key] !== undefined)
+    .map(dossier => {
       const nom = slugify(dossier.key);
       const filename = `${OUTPUT_FOLDER}/dossiers/${nom}.json`;
       console.log(filename);
@@ -73,13 +73,13 @@ fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
 
         // count orators
         if (i.parlementaire.replace("NULL", "")) {
-          if (!curSeance["parlementaires"][i.parlementaire])
-            curSeance["parlementaires"][i.parlementaire] = 0;
-          curSeance["parlementaires"][i.parlementaire] += 1;
+          if (!curSeance.parlementaires[i.parlementaire])
+            curSeance.parlementaires[i.parlementaire] = 0;
+          curSeance.parlementaires[i.parlementaire] += 1;
         } else if (i.nom.replace("NULL", "")) {
-          if (!curSeance["personnalites"][i.nom])
-            curSeance["personnalites"][i.nom] = 0;
-          curSeance["personnalites"][i.nom] += 1;
+          if (!curSeance.personnalites[i.nom])
+            curSeance.personnalites[i.nom] = 0;
+          curSeance.personnalites[i.nom] += 1;
         }
 
         curSeance.interventions.push(i);
@@ -89,10 +89,13 @@ fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
         id: nom,
         nom: dossier.key,
         id_an: dossiersMap[dossier.key] || null,
-        metrics: {},
         seances: seances
       };
-      return fs.writeFile(filename, JSON.stringify(dos), 'utf8');
+      dossiersMap[dossier.key] = dos;
+      fs.writeFileSync(filename, JSON.stringify(dos), 'utf8');
+      dos.nb_seances = dos.seances.length;
+      delete dos.seances;
     })
   ))
   .catch(console.error)
+  .then(() => fs.writeFileSync(`${OUTPUT_FOLDER}/liste_dossiers.json`, JSON.stringify(dossiersMap), 'utf8'))
