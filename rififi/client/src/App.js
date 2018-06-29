@@ -1,122 +1,35 @@
 import React, { Component } from 'react';
-import get from 'axios'
 import TTip from 'react-tooltip';
 
-import Profile from './components/Profile';
+import {getFile} from './utils/client';
+ 
+import Layout from './views/Layout';
+import Home from './views/Home';
+import Dossier from './views/Dossier';
+
+import 'bulma/css/bulma.css'
+
+
+import {
+  BrowserRouter as Router,
+  Route,
+  Link,
+  Switch,
+} from 'react-router-dom';
 
 import './App.css';
 
-const getFile = file =>  new Promise((resolve, reject) => {
-  get(`${CONFIG.serverURL}/${file}`, {
-      credentials: 'include'
-    }).then(({data}) => resolve(data))
-      .catch(reject)
-})
-
 class App extends Component {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      dossiers: []
-    };
-  }
-
-  componentDidMount() {
-    getFile('liste.txt')
-      .then(str => {
-        this.setState({
-          dossiers: str.split('\n').map(s => s.trim())
-        })
-      })
-      .catch(console.error)
-  }
-
-  getData = dossier => {
-    getFile(dossier)
-    .then(data => {
-        this.setState({
-          data: data,
-          dossier
-        })
-      })
-      .catch(console.error)
-  }
-
   render = () => {
-    const {
-      state: {
-        dossiers,
-        data,
-        dossier
-      },
-      getData
-    } = this;
-    return (
-      <div className="App">
-        <aside
-          style={{
-            position: 'fixed',
-            left: 0,
-            top: 0,
-            width: '20%',
-            height: '100%',
-            overflow: 'auto'
-          }}
-        >
-          <ul>
-            {
-              dossiers.map((dossier, index) => {
-                const onClick = () => getData(dossier);
-                return <li key={index}>
-                  <button onClick={onClick}>
-                    {dossier}
-                  </button>
-                </li>
-              })
-            }
-          </ul>
-        </aside>
-        <article
-          style={{
-            position: 'fixed',
-            left: '20%',
-            top: 0,
-            width: '80%',
-            height: '100%',
-            overflow: 'auto'
-          }}
-        >
-        <div
-        style={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            width: '100%',
-            height: '100%',
-            overflow: 'auto'
-          }}
-          >
-          {
-            data ?
-              <Profile 
-              title={dossier}
-              style={{
-            position: 'absolute',
-            left: 0,
-            top: 0,
-            width: '100%',
-            height: '100%',
-            overflow: 'auto'
-          }} data={data} />
-            :
-              'Cliquer sur un texte sur la gauche'
-          }
-          </div>
-        </article>
-        <TTip place="top" id="annotation" />
-      </div>
-    );
+
+    return (<Router>
+        <Layout>
+          <Switch>
+            <Route exact path="/" component={Home} />
+            <Route exact path="/dossier/:dossierId" component={Dossier} />
+          </Switch>
+        </Layout>
+      </Router>);
   }
 }
 

@@ -47,24 +47,21 @@ class Profile extends React.Component {
       hasError, 
       size: {width, height, monitorHeight},
       data, 
-      title,
       style, 
       ...props } = this.props;
     const {temporalite} = this.state;
     let headerStep = 0;
+
     const getLength = step => 
       temporalite === 'temporel' ?
-      (step.type === 'elocution' ? step.intervention.length : 200) / 5
+      (step.type === 'elocution' ? step.intervention.split(/\s/).length : 200) / 5
       : 1;
+
     const CELL = (height || monitorHeight) / groups.length || 10;
     const totalLength = temporalite === 'temporel' ?
       data.reduce((sum, step) => sum += getLength(step), 0)
       : data.length;
     const scaleX = scales.scaleLinear().domain([0, totalLength]).range([0, width * .9])
-
-    const realTitle = title.split('.')
-    realTitle.pop();
-    realTitle.join(' ');
     let breakCount = 0;
     const seanceBreaks = data.reduce((result, datum, index) => {
       const nextDatum = index + 1 < data.length - 1 ? data[index + 1] : undefined;
@@ -78,7 +75,6 @@ class Profile extends React.Component {
     }, []);
     return (
       <div style={style}>
-      <h1>{realTitle}</h1>
       <svg  {...props} height={CELL * groups.length * 3} width={width}>
        
         <g transform={`translate(10, 10)scale(.8)`}>
@@ -149,7 +145,7 @@ class Profile extends React.Component {
           Séquentiel {temporalite === 'sequentiel' ? '(active)': ''}
         </button>
         <button onClick={() => this.setState({temporalite: 'temporel'})}>
-          Temporel {temporalite === 'temporel' ? '(active)': ''}
+          Nombre de mots {temporalite === 'temporel' ? '(active)': ''}
         </button>
       </div>
       </div>
