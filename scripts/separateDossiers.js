@@ -1,9 +1,8 @@
 /* TODO
 --------
-- add metas on dossier
-- add metrics by dossier
-- add metas on seance (sommaire, top orateurs, stats didascalies ..)
+- add metas on seance (sommaire, stats didascalies ..)
 - add metrics by seance ?
+- add metrics by dossier
 - filter dossiers nearly empty/non legislative (no id_an)
 - lighten data by removing redundancy field
 */
@@ -36,11 +35,21 @@ fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
           curSeance = {
             id: i.seance_id,
             sommaire: [],
-            orateurs: [],
+            parlementaires: {},
+            personnalites: {},
             interventions: []
           }
         }
         curSeance.interventions.push(i);
+        if (i.parlementaire.replace("NULL", "")) {
+          if (!curSeance["parlementaires"][i.parlementaire])
+            curSeance["parlementaires"][i.parlementaire] = 0;
+          curSeance["parlementaires"][i.parlementaire] += 1;
+        } else if (i.nom.replace("NULL", "")) {
+          if (!curSeance["personnalites"][i.nom])
+            curSeance["personnalites"][i.nom] = 0;
+          curSeance["personnalites"][i.nom] += 1;
+        }
       });
       seances.push(curSeance);
       let dos = {
