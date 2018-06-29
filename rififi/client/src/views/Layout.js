@@ -90,7 +90,7 @@ export default class Layout extends Component {
                       <NavbarDropdown>
                         {
                           dossiers.map((dossier, index) => {
-                            return <NavbarItem href={`/dossier/${dossier}`}>{dossier}</NavbarItem>
+                            return <NavbarItem key={index} href={`/dossier/${dossier}`}>{dossier}</NavbarItem>
                           })
                         }
                       </NavbarDropdown>

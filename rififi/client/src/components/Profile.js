@@ -73,6 +73,8 @@ class Profile extends React.Component {
       }
       return result;
     }, []);
+
+    let lineStep = 0;
     return (
       <div style={style}>
       <svg  {...props} height={CELL * groups.length * 3} width={width}>
@@ -105,6 +107,7 @@ class Profile extends React.Component {
               })}
              </g>
           </g>
+
         {
           groups.map(
             (group, index1) => {
@@ -138,6 +141,41 @@ class Profile extends React.Component {
           }
           )
         }
+        <g transform={`translate(${CELL * 10}, ${CELL})`}>
+            {
+              data.reduce((result, step, index2) => {
+                const width1 = scaleX(getLength(step));
+                const x1 = lineStep + width1/2;
+                lineStep += width1;
+                const next = index2 < data.length - 1 ? data[index2 + 1] : undefined;
+                if (next) {
+                  const width2 = scaleX(getLength(next));
+                  const x2 = lineStep + width2/2;
+                  step.groupes.forEach((groupeIn, groupeIndex) => {
+                    next.groupes.forEach((groupeOut, groupeIndex2) => {
+                      const iIn = groups.indexOf(groupeIn);
+                      const iOut = groups.indexOf(groupeOut);
+                      const y1 = CELL * iIn * 2 + CELL/2;
+                      const y2 = CELL * iOut * 2 + CELL/2;
+                      console.log(y1, y2);
+                      result.push(
+                        <line
+                          key={x1}
+                          x1={x1}
+                          x2={x2}
+                          y1={y1}
+                          y2={y2}
+                          stroke={'black'}
+                        />
+                      )
+                    })
+                  })
+                }
+
+                return result;
+              }, [])
+            }
+          </g>
         </g>
       </svg>
       <div>
