@@ -23,6 +23,11 @@ const dossiersMap = dsv.tsvParse(fs.readFileSync(`${DATA_FOLDER}/dossiers_ids.ts
     return Object.assign(result, { [obj.titre]: obj.id_dossier_an.replace("NULL", "") || null })
   }, {});
 
+const addSeance = function(seances, s) {
+  s.pc_interruptions = s.nb_interruptions / s.interventions.length;
+  seances.push(s);
+};
+
 fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
   .then(() => fs.readFile(`${DATA_FOLDER}/dossiers.json`))
   .then(dossiers => Promise.all(
@@ -34,15 +39,37 @@ fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
       let curSeance = {};
       dossier.values.forEach(function(i){
         if (i.seance_id !== curSeance.id) {
-          if (curSeance.id) seances.push(curSeance);
+          if (curSeance.id) addSeance(seances, curSeance);
           curSeance = {
             id: i.seance_id,
             sommaire: [],
             parlementaires: {},
             personnalites: {},
-            interventions: []
+            interventions: [],
+            nb_cars: 0,
+            nb_mots: 0,
+            nb_excl: 0,
+            nb_mots: 0,
+            nb_interruptions: 0,
+            pc_interruptions: 0
           }
         }
+        // Metrics on intervention
+        let clinterv = i["intervention"].replace(/<[a-z][^>]+>/g, ''),
+          phrases = sentences(clinterv);
+        i.nb_cars = clinterv.length;
+        i.nb_mots = words(clinterv).length;
+        i.nb_excl = (clinterv.match(/\!/g) || []).length;
+        i.nb_qust = (clinterv.match(/\?/g) || []).length;
+        i.nb_phrs = phrases.length;
+        i.nb_mwbp = i.nb_cars / i.nb_phrs;
+        i.interruption = (i.type == "didascalie" || (i.nb_mots < 20 && i.nb_excl > 0));
+
+        // Agregate by seance
+        curSeance.nb_cars += i.nb_cars;
+        curSeance.nb_mots += i.nb_mots;
+        curSeance.nb_excl += i.nb_excl;
+        curSeance.nb_interruptions += i.interruption;
 
         // count orators
         if (i.parlementaire.replace("NULL", "")) {
@@ -55,19 +82,9 @@ fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
           curSeance["personnalites"][i.nom] += 1;
         }
 
-        // Metrics on intervention
-        let clinterv = i["intervention"].replace(/<[a-z][^>]+>/g, ''),
-            phrases = sentences(clinterv);
-        i.nb_cars = clinterv.length;
-        i.nb_mots = words(clinterv).length;
-        i.nb_excl = (clinterv.match(/\!/g) || []).length;
-        i.nb_qust = (clinterv.match(/\?/g) || []).length;
-        i.nb_phrs = phrases.length;
-        i.nb_mwbp = i.nb_cars / i.nb_phrs;
-
         curSeance.interventions.push(i);
       });
-      seances.push(curSeance);
+      addSeance(seances, curSeance);
       let dos = {
         id: nom,
         nom: dossier.key,
