@@ -1,6 +1,12 @@
 const React = require('react');
 const scales = require('d3-scale');
 const { withSize } = require('react-sizeme');
+
+const Bloomer = require('bloomer');
+const {
+  Button
+} = Bloomer;
+
 const groups = [
   'présidence',
   'gouvernement',
@@ -18,17 +24,6 @@ const groups = [
 const Rect = ({x, stroke='transparent', fill='transparent', tip, width = 0, height}) =>
   <rect data-html={true} data-for='annotation' title={tip} data-tip={tip} stroke={stroke} fill={fill} width={width} height={height} x={x} y={0} />
 
-const toneToColor = ton => {
-  switch(ton) {
-    case 'positif':
-      return 'green';
-    case 'negatif':
-      return 'red';
-    default:
-      return 'lightgrey';
-  }
-}
-
 const buildTipForIntervention = ({intervention, fonction, parlementaire, nom, parlementaire_groupe_acronyme}) => `
   <div>${parlementaire !== 'NULL' ? parlementaire : nom}${fonction ? ` (${fonction})` : ''}${parlementaire_groupe_acronyme !== 'NULL' ? ` (${parlementaire_groupe_acronyme})` : ''}</div>
   <div>${intervention}</div>
@@ -41,6 +36,24 @@ class Profile extends React.Component {
     this.state = {
       temporalite: 'sequentiel'
     }
+  }
+
+  toneToColor = ton => {
+    switch(ton) {
+      case 'positif':
+        return 'green';
+      case 'negatif':
+        return 'red';
+      default:
+        return 'lightgrey';
+    }
+  }
+
+  getColor = step => {
+    return step.type === 'elocution' ?
+                                  (step.intervention.length < 60 && step.intervention.indexOf('!') > -1) ? 'brown' : 'lightblue'
+                                   : 
+                                   this.toneToColor(step.ton);
   }
   render() {
     const { 
@@ -57,7 +70,10 @@ class Profile extends React.Component {
       (step.type === 'elocution' ? step.intervention.split(/\s/).length : 200) / 5
       : 1;
 
-    const CELL = (height || monitorHeight) / groups.length || 10;
+    const realHeight = height < window.innerHeight && height > 0 ? height:  window.innerHeight / 5;
+
+    const CELL = (realHeight) / groups.length || 10;
+
     const totalLength = temporalite === 'temporel' ?
       data.reduce((sum, step) => sum += getLength(step), 0)
       : data.length;
@@ -84,9 +100,9 @@ class Profile extends React.Component {
             <text>Agrégé</text>
              <g transform={`translate(${CELL * 10}, -${CELL})`}>
               {
-                seanceBreaks.map(point => (
+                seanceBreaks.map((point,index) => (
                   <line 
-                    key={point.x}
+                    key={index}
                     x1={point.x}
                     x2={point.x}
                     y1={0}
@@ -96,10 +112,7 @@ class Profile extends React.Component {
                 ))
               }
               {data.map((step, index2) => {
-                const color = step.type === 'elocution' ?
-                                  (step.intervention.length < 60 && step.intervention.indexOf('!') > -1) ? 'brown' : 'lightblue'
-                                   : 
-                                   toneToColor(step.ton);
+                const color = this.getColor(step);
                 const width = scaleX(getLength(step));
                 const x = headerStep;
                 headerStep += width;
@@ -128,7 +141,7 @@ class Profile extends React.Component {
                         
                         return <Rect tip={buildTipForIntervention(step)} height={CELL} key={index2}  width={width} x={x} fill={interjection ? 'brown' : 'lightblue'} />
                       } else {
-                        return <Rect tip={step.didascalie} height={CELL} key={index2} x={x}  width={width} fill={toneToColor(step.ton)}  />
+                        return <Rect tip={step.didascalie} height={CELL} key={index2} x={x}  width={width} fill={this.toneToColor(step.ton)}  />
                       }
                     }
                     return <Rect key={index2} x={index2} height={CELL}  />
@@ -157,15 +170,17 @@ class Profile extends React.Component {
                       const iOut = groups.indexOf(groupeOut);
                       const y1 = CELL * iIn * 2 + CELL/2;
                       const y2 = CELL * iOut * 2 + CELL/2;
-                      console.log(y1, y2);
+
+                      const color = this.getColor(next);
+                      
                       result.push(
                         <line
-                          key={x1}
+                          key={`${index2}${groupeIndex}${groupeIndex2}`}
                           x1={x1}
                           x2={x2}
                           y1={y1}
                           y2={y2}
-                          stroke={'black'}
+                          stroke={color}
                         />
                       )
                     })
@@ -179,18 +194,21 @@ class Profile extends React.Component {
         </g>
       </svg>
       <div>
-        <button onClick={() => this.setState({temporalite: 'sequentiel'})}>
+        <Button isColor={temporalite === 'sequentiel' ? 'info': 'primary'} onClick={() => this.setState({temporalite: 'sequentiel'})}>
           Séquentiel {temporalite === 'sequentiel' ? '(active)': ''}
-        </button>
-        <button onClick={() => this.setState({temporalite: 'temporel'})}>
+        </Button>
+        <Button isColor={temporalite === 'temporel' ? 'info': 'primary'} onClick={() => this.setState({temporalite: 'temporel'})}>
           Nombre de mots {temporalite === 'temporel' ? '(active)': ''}
-        </button>
+        </Button>
       </div>
       </div>
     );
   }
 }
 
-module.exports = withSize()(Profile);
+module.exports = withSize({
+  // monitorWidth: true,
+  // monitorHeight: true
+})(Profile);
 
 // module.exports = List;

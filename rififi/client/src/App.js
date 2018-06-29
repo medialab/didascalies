@@ -7,9 +7,6 @@ import Layout from './views/Layout';
 import Home from './views/Home';
 import Dossier from './views/Dossier';
 
-import 'bulma/css/bulma.css'
-
-
 import {
   BrowserRouter as Router,
   Route,
@@ -17,7 +14,10 @@ import {
   Switch,
 } from 'react-router-dom';
 
-import './App.css';
+
+import 'bulma/css/bulma.css'
+
+import './App.scss';
 
 class App extends Component {
   render = () => {

@@ -42,7 +42,7 @@ export default class Layout extends Component {
   })
 
   componentDidMount() {
-    getFile('liste.txt')
+    getFile('/dossiers/liste.txt')
       .then(str => {
         this.setState({
           dossiers: str.split('\n').map(s => s.trim())
@@ -119,7 +119,9 @@ export default class Layout extends Component {
           </Navbar>
           <Level/>
           <Level/>
-          {children}
+          <div>
+            {children}
+          </div>
       </div>
     );
   }

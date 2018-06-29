@@ -22,7 +22,7 @@ class App extends Component {
 
 
   getData = dossierId => {
-    getFile(dossierId)
+    getFile(`/dossiers/${dossierId}`)
     .then(data => {
         this.setState({
           data: data,
@@ -58,21 +58,30 @@ class App extends Component {
 
     return (
       <Container>
-        <article>
         <div>
         <Title>
           {dossierName}
         </Title>
           {
             data ?
-              <Profile 
-              title={dossierName}
-               data={data} />
+              data
+              .seances
+              .map((seance, seanceIndex) => 
+                <div
+                key={seanceIndex} 
+                >
+                  <Title isSize={2}>
+                    Séance {seanceIndex + 1}
+                  </Title>
+                  <Profile
+                  data={seance.interventions} />
+                </div>
+               )
+              
             :
               'Chargement'
           }
           </div>
-        </article>
         <TTip place="top" id="annotation" />
       </Container>
     );

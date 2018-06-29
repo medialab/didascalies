@@ -1,0 +1,19 @@
+
+$bgblur: 50px;
+
+#videobg{
+  position: absolute;
+   top: 0px;
+   left: 0px;
+   min-width: 100%;
+   min-height: 100%;
+   width: auto;
+   height: auto;
+   /*z-index: -1000;*/
+   overflow: hidden;
+    -webkit-filter: blur($bgblur);
+  -moz-filter: blur($bgblur);
+  -o-filter: blur($bgblur);
+  -ms-filter: blur($bgblur);
+  filter: blur($bgblur);
+}
