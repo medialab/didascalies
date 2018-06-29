@@ -11,6 +11,8 @@ const dsv = require('d3-dsv');
 const fs = require('fs-extra');
 const path = require('path');
 const slugify = require('slugify');
+const words = require('talisman/tokenizers/words')
+const sentences = require('talisman/tokenizers/sentences');
 
 const DATA_FOLDER = path.resolve(__dirname + '/../data/');
 const OUTPUT_FOLDER = path.resolve(__dirname + '/../rififi/server/data/');
@@ -20,6 +22,7 @@ const dossiersMap = dsv.tsvParse(fs.readFileSync(`${DATA_FOLDER}/dossiers_ids.ts
   .reduce((result, obj) => {
     return Object.assign(result, { [obj.titre]: obj.id_dossier_an.replace("NULL", "") || null })
   }, {});
+
 fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
   .then(() => fs.readFile(`${DATA_FOLDER}/dossiers.json`))
   .then(dossiers => Promise.all(
@@ -40,7 +43,8 @@ fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
             interventions: []
           }
         }
-        curSeance.interventions.push(i);
+
+        // count orators
         if (i.parlementaire.replace("NULL", "")) {
           if (!curSeance["parlementaires"][i.parlementaire])
             curSeance["parlementaires"][i.parlementaire] = 0;
@@ -50,6 +54,18 @@ fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
             curSeance["personnalites"][i.nom] = 0;
           curSeance["personnalites"][i.nom] += 1;
         }
+
+        // Metrics on intervention
+        let clinterv = i["intervention"].replace(/<[a-z][^>]+>/g, ''),
+            phrases = sentences(clinterv);
+        i.nb_cars = clinterv.length;
+        i.nb_mots = words(clinterv).length;
+        i.nb_excl = (clinterv.match(/\!/g) || []).length;
+        i.nb_qust = (clinterv.match(/\?/g) || []).length;
+        i.nb_phrs = phrases.length;
+        i.nb_mwbp = i.nb_cars / i.nb_phrs;
+
+        curSeance.interventions.push(i);
       });
       seances.push(curSeance);
       let dos = {
