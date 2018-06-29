@@ -1,6 +1,5 @@
 const React = require('react');
 const scales = require('d3-scale');
-const uniq = require('lodash').uniq;
 const arrays = require('d3-array');
 const max = arrays.max;
 const extent = arrays.extent;
@@ -27,6 +26,8 @@ class Assemblee extends React.Component {
       listeDeputes,
       placesAssemblee, 
       style, 
+      groupes,
+      highlight = [],
       ...props
      } = this.props;
 
@@ -39,9 +40,6 @@ class Assemblee extends React.Component {
         )
         );
 
-    uniq(Object.keys(listeDeputes).map(key => {
-      return listeDeputes[key].depute.groupe_sigle
-    })).map(d => console.log(d));
     const height = width / 2;
 
     const rad = height / 80;
@@ -62,7 +60,22 @@ class Assemblee extends React.Component {
           <g  transform={'translate(10, 10)scale(.8)'}>
           {
             placesAssembleeList.map((place, index) => {
-              const deputeInfo = listeDeputes[place.place] && listeDeputes[place.place].depute;
+              let deputeInfo = listeDeputes.find(d => d.depute.place_en_hemicycle === place.place);
+              let groupe;
+              let fill = 'transparent';
+              let highlighted;
+              let realRad = rad;
+              if (deputeInfo) {
+                deputeInfo = deputeInfo.depute;
+                groupe = groupes[deputeInfo.groupe_sigle];
+                if (highlight.indexOf(deputeInfo.nom) > -1) {
+                  highlighted = true;
+                }
+              }
+              if (highlighted) {
+                fill = groupe ? `rgb(${groupe.couleur})`: 'lightgrey'
+                realRad *= 2;
+              }
               return (
                 <ellipse
                   key={index}
@@ -70,10 +83,10 @@ class Assemblee extends React.Component {
                   cy={scaleY(place.y)}
                   data-tip={deputeInfo ? `${deputeInfo.nom} (${deputeInfo.groupe_sigle})` : '?'}
                   data-for='assemblee'
-                  rx={rad}
-                  ry={rad}
-                  stroke={deputeInfo ? colors[deputeInfo.groupe_sigle] : 'lightrey'}
-                  fill={'transparent'}
+                  rx={realRad}
+                  ry={realRad}
+                  stroke={groupe ? `rgb(${groupe.couleur})`: 'lightgrey'}
+                  fill={fill}
                 />
               )
             })

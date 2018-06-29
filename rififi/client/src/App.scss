@@ -17,3 +17,9 @@ $bgblur: 50px;
   -ms-filter: blur($bgblur);
   filter: blur($bgblur);
 }
+
+rect,
+ellipse,
+text{
+  transition: all .2s ease;
+}

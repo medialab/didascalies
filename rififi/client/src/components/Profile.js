@@ -30,8 +30,29 @@ const groups = [
   'NI'
 ];
 
-const Rect = ({x, stroke='transparent', fill='transparent', tip, width = 0, height}) =>
-  <rect data-html={true} data-for='annotation' title={tip} data-tip={tip} stroke={stroke} fill={fill} width={width} height={height} x={x} y={0} />
+const Rect = ({
+  x, 
+  fill='transparent', 
+  tip, 
+  width = 0,
+  height,
+  onHover,
+  onOut,
+  active
+}) =>
+  <rect 
+    onMouseOver={onHover} 
+    onMouseOut={onOut} 
+    data-html={true} 
+    data-for='annotation' 
+    title={tip} 
+    stroke={active ? 'black': 'transparent'} 
+    fill={fill} 
+    width={width} 
+    height={height} 
+    x={x} 
+    y={0} 
+  />
 
 const buildTipForIntervention = ({intervention, fonction, parlementaire, nom, parlementaire_groupe_acronyme}) => `
   <div>${parlementaire !== 'NULL' ? parlementaire : nom}${fonction ? ` (${fonction})` : ''}${parlementaire_groupe_acronyme !== 'NULL' ? ` (${parlementaire_groupe_acronyme})` : ''}</div>
@@ -43,7 +64,8 @@ class Profile extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      temporalite: 'sequentiel'
+      temporalite: 'sequentiel',
+      playing: false
     }
   }
 
@@ -58,6 +80,14 @@ class Profile extends React.Component {
     }
   }
 
+  componentWillUpdate = (nextProps, nextState) => {
+    if (nextState.playing) {
+      setTimeout(() => {
+        this.props.onUpdateStep((nextProps.currentStep || 0) + 1, nextProps.id)
+      }, 400)
+    }
+  }
+
   getColor = step => {
     return step.type === 'elocution' ?
                                   (step.intervention.length < 60 && step.intervention.indexOf('!') > -1) ? colors.exclamation : colors.intervention
@@ -68,9 +98,18 @@ class Profile extends React.Component {
     const { 
       hasError, 
       size: {width, height, monitorHeight},
+      id,
       data, 
+      onHover,
+      onOut,
       style, 
-      ...props } = this.props;
+      currentStep,
+      seanceIndex,
+      // ...props
+    } = this.props;
+    const {
+      playing
+    } = this.state;
     const {temporalite} = this.state;
     let headerStep = 0;
 
@@ -99,11 +138,25 @@ class Profile extends React.Component {
       return result;
     }, []);
 
+    let summaryCount = 0;
+    const summary = data.reduce((result, datum, index) => {
+      const nextDatum = index + 1 < data.length - 1 ? data[index + 1] : undefined;
+      breakCount += getLength(datum);
+      if (nextDatum && datum.seance_id !== nextDatum.seance_id) {
+        return result.concat({
+          x: breakCount
+        })
+      }
+      return result;
+    }, []);
+
     let lineStep = 0;
     return (
       <div style={style}>
-        <svg  {...props} height={CELL * groups.length * 2} width={width}>
-         
+        <Button onClick={() => this.setState({playing: !this.state.playing})}>
+          {playing ? 'Pause': 'Lecture'}
+        </Button>
+        <svg height={CELL * groups.length * 2} width={width}>
           <g transform={`translate(10, 10)scale(.8)`}>
             <g>
               <text>Agrégé</text>
@@ -125,7 +178,14 @@ class Profile extends React.Component {
                   const width = scaleX(getLength(step));
                   const x = headerStep;
                   headerStep += width;
-                  return <Rect height={CELL} tip={step.didascalie || buildTipForIntervention(step)} width={width} key={index2} x={x} fill={color} />
+                  const onMouseOver = () => {
+                    onHover(step, index2, id);
+                    if (playing) this.setState({playing: false})
+                  }
+                  const onMouseOut = () => {
+                    onOut(step);
+                  }
+                  return <Rect active={currentStep === index2} onOut={onMouseOut} onHover={onMouseOver} height={CELL} tip={step.didascalie || buildTipForIntervention(step)} width={width} key={index2} x={x} fill={color} />
                 })}
                </g>
             </g>
@@ -138,22 +198,36 @@ class Profile extends React.Component {
                 <g transform={`translate(0, ${CELL * 2  + CELL * index1 * 2})`} key={index1}>
                   <text>{group}</text>
                   <g transform={`translate(${CELL * 10}, -${CELL})`}>
+                  <rect
+                    fill={'rgba(0,0,0,0.1)'}
+                    x={0}
+                    y={0}
+                    height={CELL}
+                    width={scaleX(totalLength)}
+                  />
                   {
                     data.map((step, index2) => {
                       const concerned = !step.groupes.length && group === 'global' || step.groupes.indexOf(group) > -1;
                       const width = scaleX(getLength(step));
                       const x = localStep;
                       localStep += width;
+                      const onMouseOver = () => {
+                        onHover(step, index2, id);
+                        if (playing) this.setState({playing: false})
+                      }
+                      const onMouseOut = () => {
+                        onOut(step);
+                      }
                       if (concerned) {
                         if (step.type === 'elocution') {
                           const interjection = (step.intervention.length < 60 && step.intervention.indexOf('!') > -1);
                           
-                          return <Rect tip={buildTipForIntervention(step)} height={CELL} key={index2}  width={width} x={x} fill={interjection ? 'brown' : 'lightblue'} />
+                          return <Rect onHover={onMouseOver} onOut={onMouseOut} active={currentStep === index2} tip={buildTipForIntervention(step)} height={CELL} key={index2}  width={width} x={x} fill={interjection ? 'brown' : 'lightblue'} />
                         } else {
-                          return <Rect tip={step.didascalie} height={CELL} key={index2} x={x}  width={width} fill={this.toneToColor(step.ton)}  />
+                          return <Rect onHover={onMouseOver} onOut={onMouseOut} active={currentStep === index2} tip={step.didascalie} height={CELL} key={index2} x={x}  width={width} fill={this.toneToColor(step.ton)}  />
                         }
                       }
-                      return <Rect key={index2} x={index2} height={CELL}  />
+                      return <Rect onHover={onMouseOver} onOut={onMouseOut} active={currentStep === index2} key={index2} x={index2} height={CELL}  />
                     })
                   }
                   </g>

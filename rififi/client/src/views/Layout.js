@@ -29,6 +29,7 @@ export default class Layout extends Component {
     dossiers: PropTypes.array,
     listeDeputes: PropTypes.array,
     placesAssemblee: PropTypes.object,
+    groupes: PropTypes.object,
   }
 
   constructor(props) {
@@ -37,6 +38,7 @@ export default class Layout extends Component {
       dossiers: [],
       listeDeputes: undefined,
       placesAssemblee: undefined,
+      groupes: undefined,
       navIsActive: false,
     };
   }
@@ -44,7 +46,8 @@ export default class Layout extends Component {
   getChildContext = () => ({
     dossiers: this.state.dossiers,
     listeDeputes: this.state.listeDeputes,
-    placesAssemblee: this.state.placesAssemblee
+    placesAssemblee: this.state.placesAssemblee,
+    groupes: this.state.groupes,
   })
 
   componentDidMount() {
@@ -66,6 +69,16 @@ export default class Layout extends Component {
       .then(placesAssemblee => {
         this.setState({
           placesAssemblee 
+        })
+      })
+      .catch(console.error)
+    getFile('/resources/groupes.json')
+      .then(groupes => {
+        this.setState({
+          groupes: groupes.organismes.reduce((result, orga) => ({
+            ...result,
+            [orga.organisme.acronyme]: orga.organisme
+          }), {}) 
         })
       })
       .catch(console.error)
