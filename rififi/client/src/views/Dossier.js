@@ -33,7 +33,6 @@ class App extends Component {
   getData = dossierId => {
     getFile(`/dossiers/${dossierId}`)
     .then(data => {
-        console.log('gotcha', data.length);
         this.setState({
           data: data,
           dossierName: dossierId
@@ -92,9 +91,9 @@ class App extends Component {
   }
 
   handleOutStep = () => {
-    this.setState({
-      highlightedParlementaires: undefined
-    })
+    // this.setState({
+    //   highlightedParlementaires: undefined
+    // })
   }
 
   handleUpdateState = (index, seanceIndex) => {
@@ -126,11 +125,12 @@ class App extends Component {
     } = this;
 
 
-    const currentStepData = currentStep !== undefined && currentSeanceIndex !== undefined ? data.seances[currentSeanceIndex].interventions[currentStep] : undefined;
+    let currentStepData = currentStep !== undefined && currentSeanceIndex !== undefined ? data.seances[currentSeanceIndex].interventions[currentStep] : undefined;
     let currentDepute;
-    if (currentStepData) {
+    if (currentStepData && currentStepData.type !== 'didascalie') {
       currentDepute = listeDeputes.find(d => d.depute.nom === currentStepData.parlementaire);
     }
+    console.log(data);
     return (
       <Container>
           

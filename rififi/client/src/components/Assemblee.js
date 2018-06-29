@@ -91,6 +91,16 @@ class Assemblee extends React.Component {
               )
             })
           }
+          <ellipse
+            cx={scaleX(xExtent[1]/2)}
+            cy={scaleY(yExtent[1])}
+            data-tip={'gouvernement'}
+            data-for='assemblee'
+            rx={rad}
+            ry={rad}
+            stroke={'grey'}
+            fill={highlight.indexOf('NULL') > -1 ? 'grey': 'transparent'}
+          />
           </g>
         </svg>
         <TTip id="assemblee" />
