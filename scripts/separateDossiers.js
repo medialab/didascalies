@@ -55,15 +55,25 @@ fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
           }
         }
         // Metrics on intervention
-        let clinterv = i["intervention"].replace(/<[a-z][^>]+>/g, ''),
-          phrases = sentences(clinterv);
-        i.nb_cars = clinterv.length;
-        i.nb_mots = words(clinterv).length;
-        i.nb_excl = (clinterv.match(/\!/g) || []).length;
-        i.nb_qust = (clinterv.match(/\?/g) || []).length;
-        i.nb_phrs = phrases.length;
-        i.nb_mwbp = i.nb_cars / i.nb_phrs;
-        i.interruption = (i.type == "didascalie" || (i.nb_mots < 20 && i.nb_excl > 0));
+        if (i.type === "didascalie") {
+          i.nb_cars = 0;
+          i.nb_mots = 0;
+          i.nb_excl = 0;
+          i.nb_qust = 0;
+          i.nb_phrs = 0;
+          i.nb_mwbp = 0;
+          i.interruption = true;
+        } else {
+          let clinterv = i["intervention"].replace(/<[a-z][^>]+>/g, ''),
+            phrases = sentences(clinterv);
+          i.nb_cars = clinterv.length;
+          i.nb_mots = words(clinterv).length;
+          i.nb_excl = (clinterv.match(/\!/g) || []).length;
+          i.nb_qust = (clinterv.match(/\?/g) || []).length;
+          i.nb_phrs = phrases.length;
+          i.nb_mwbp = i.nb_cars / i.nb_phrs;
+          i.interruption = (i.nb_mots < 20 && i.nb_excl > 0);
+        }
 
         // Agregate by seance
         curSeance.nb_cars += i.nb_cars;
@@ -85,11 +95,14 @@ fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
         curSeance.interventions.push(i);
       });
       addSeance(seances, curSeance);
+      total_interv = seances.reduce((res, s) => res + s.interventions.length, 0);
       let dos = {
         id: nom,
         nom: dossier.key,
         id_an: dossiersMap[dossier.key] || null,
-        seances: seances
+        seances: seances,
+        nb_interv: total_interv,
+        pc_interruptions: seances.reduce((res, s) => res + s.nb_interruptions, 0) / total_interv
       };
       dossiersMap[dossier.key] = dos;
       fs.writeFileSync(filename, JSON.stringify(dos), 'utf8');
