@@ -2,12 +2,13 @@
  * Webpack configuration base for handling the application's source code
  */
 var webpack = require('webpack');
+var config = require('config');
 
 module.exports = {
   module: {
     rules: [
       {
-        test: /\.(jpe?g|png|gif|svg)$/i,
+        test: /\.(woff|ttf|otf|eot|woff2)$/i,
          use: [
           {
             loader: 'file-loader',
@@ -17,22 +18,14 @@ module.exports = {
               }
             }
           },
-        {
-          loader: 'image-webpack-loader',
-          options: {
-            query: {
-              mozjpeg: {
-                progressive: true,
-              },
-              gifsicle: {
-                interlaced: true,
-              },
-              optipng: {
-                optimizationLevel: 7,
-              }
-            }
-          }
-        }]
+        ]
+      },
+      {
+        test: /\.(jpe?g|png|gif|svg)$/i,
+        use: [
+          'url-loader?limit=10000',
+          'img-loader'
+        ]
       },
       {
         test: /\.scss$/,
@@ -45,5 +38,8 @@ module.exports = {
     ]
   },
   plugins: [
+    new webpack.DefinePlugin({
+      CONFIG: JSON.stringify(config)
+    })
   ]
 };

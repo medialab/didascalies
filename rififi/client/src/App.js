@@ -2,13 +2,12 @@ import React, { Component } from 'react';
 import get from 'axios'
 import TTip from 'react-tooltip';
 
-
 import Profile from './components/Profile';
 
 import './App.css';
 
 const getFile = file =>  new Promise((resolve, reject) => {
-  get(`http://localhost:8000/${file}`, {
+  get(`${CONFIG.serverURL}/${file}`, {
       credentials: 'include'
     }).then(({data}) => resolve(data))
       .catch(reject)
