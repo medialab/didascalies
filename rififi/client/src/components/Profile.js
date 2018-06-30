@@ -8,6 +8,7 @@ const {
   Button,
   Box,
   Column,
+  Title,
 } = Bloomer;
 
 const colors = {
@@ -287,7 +288,11 @@ class Profile extends React.Component {
           </Button>
         </div>
         <Column id="legend">
-        <Box>{
+        <Box>
+          <Title isSize={4}>
+            Légende
+          </Title>
+        {
           Object.keys(colors)
           .map(colorKey => (
             <div key={colorKey}>
@@ -296,7 +301,8 @@ class Profile extends React.Component {
                   width: '1rem',
                   height: '1rem',
                   background: colors[colorKey],
-                  display: 'inline-block'
+                  display: 'inline-block',
+                  marginRight: '1rem'
                 }}
               />
               <span>{colorKey}</span>

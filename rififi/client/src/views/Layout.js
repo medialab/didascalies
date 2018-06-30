@@ -111,7 +111,7 @@ export default class Layout extends Component {
     const dossiersList = Object.keys(dossiers).map(key => dossiers[key]).filter(d => d);
     return (
       <div className="Layout">
-        <Navbar>
+        <Navbar style={{position: 'fixed', top: 0, left: 0, width: '100%'}}>
           <NavbarBrand>
               <NavbarItem isHidden='desktop'>
                   <Icon className='fa fa-github' />
@@ -171,6 +171,8 @@ export default class Layout extends Component {
               </NavbarEnd>
           </NavbarMenu>
           </Navbar>
+          <Level/>
+          <Level/>
           <Level/>
           <Level/>
           <div>
