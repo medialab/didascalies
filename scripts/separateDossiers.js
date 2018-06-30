@@ -54,19 +54,39 @@ fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
             nb_excl: 0,
             nb_mots: 0,
             nb_interruptions: 0,
-            pc_interruptions: 0
+            pc_interruptions: 0,
+            nb_didasc_positives: 0,
+            nb_didasc_negatives: 0,
+            nb_didasc_neutres: 0,
           }
         }
         // Metrics on intervention
-        let clinterv = i["intervention"].replace(/<[a-z][^>]+>/g, ''),
-          phrases = sentences(clinterv);
-        i.nb_cars = clinterv.length;
-        i.nb_mots = words(clinterv).length;
-        i.nb_excl = (clinterv.match(/\!/g) || []).length;
-        i.nb_qust = (clinterv.match(/\?/g) || []).length;
-        i.nb_phrs = phrases.length;
-        i.nb_mwbp = i.nb_cars / i.nb_phrs;
-        i.interruption = (i.type == "didascalie" || (i.nb_mots < 20 && i.nb_excl > 0));
+        if (i.type === "didascalie") {
+          i.nb_cars = 0;
+          i.nb_mots = 0;
+          i.nb_excl = 0;
+          i.nb_qust = 0;
+          i.nb_phrs = 0;
+          i.nb_mwbp = 0;
+          i.interruption = true;
+          if (i.ton === 'positif') {
+            curSeance.nb_didasc_positives++;
+          } else if (i.ton === 'negatif') {
+            curSeance.nb_didasc_negatives++;
+          } else {
+            curSeance.nb_didasc_neutres++;
+          }
+        } else {
+          let clinterv = i["intervention"].replace(/<[a-z][^>]+>/g, ''),
+            phrases = sentences(clinterv);
+          i.nb_cars = clinterv.length;
+          i.nb_mots = words(clinterv).length;
+          i.nb_excl = (clinterv.match(/\!/g) || []).length;
+          i.nb_qust = (clinterv.match(/\?/g) || []).length;
+          i.nb_phrs = phrases.length;
+          i.nb_mwbp = i.nb_cars / i.nb_phrs;
+          i.interruption = (i.nb_mots < 20 && i.nb_excl > 0);
+        }
 
         // Agregate by seance
         curSeance.nb_cars += i.nb_cars;
@@ -90,19 +110,39 @@ fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
       addSeance(seances, curSeance);
 
       const sum = (items, key) => items.reduce((sum, item) => sum + item[key], 0);
+      total_interv = seances.reduce((res, s) => res + s.interventions.length, 0);
+
+      const merge = (items, key) => items.reduce((res, item) => ({
+        ...res,
+        ...item,
+      }), {})
+
+      const parlementaires = merge(seances, 'parlementaires');
+      const personalites = merge(seances, 'personalites');
       let dos = {
         id: nom,
         nom: dossier.key,
         id_an: dossiersMap[dossier.key] || null,
         seances: seances,
+        nb_seances: seances.length,
         // sum of nb cars and mots
         nb_cars: sum(seances, 'nb_cars'),
         nb_mots: sum(seances, 'nb_mots'),
         nb_excl: sum(seances, 'nb_excl'),
+
+        parlementaires,
+        personalites,
+        nb_orateurs: Object.keys(parlementaires).length + Object.keys(personalites).length,
+    
+
+        nb_didasc_neutres: sum(seances, 'nb_didasc_neutres'),
+        nb_didasc_positives: sum(seances, 'nb_didasc_positives'),
+        nb_didasc_negatives: sum(seances, 'nb_didasc_negatives'),
         nb_interruptions: sum(seances, 'nb_interruptions'),
         profile_interruptions: seances.map(s => s.pc_interruptions),
         // mean of nb interruptions
-        pc_interruptions: seances.reduce((sum, s) => sum + s.pc_interruptions , 0) / seances.length
+        pc_interruptions: seances.reduce((sum, s) => sum + s.pc_interruptions , 0) / seances.length,
+        nb_interv: total_interv,
       };
       dossiersMap[dossier.key] = dos;
       fs.writeFileSync(filename, JSON.stringify(dos), 'utf8');
