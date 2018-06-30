@@ -26,6 +26,12 @@ const dossiersMap = dsv.tsvParse(fs.readFileSync(`${DATA_FOLDER}/dossiers_ids.ts
 
 const addSeance = function(seances, s) {
   s.pc_interruptions = s.nb_interruptions / s.interventions.length;
+  s.interventions.forEach((interv, idx) => {
+    let mini = Math.max(0, idx - 10),
+      maxi = Math.min(s.interventions.length, idx + 11),
+      slice = s.interventions.slice(mini, maxi);
+    interv.animation_rate = slice.reduce((res, i) => res + i.interruption, 0) / slice.reduce((res, i) => res + i.nb_mots, 0);
+  });
   seances.push(s);
 };
 
@@ -118,7 +124,7 @@ fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
       }), {})
 
       const parlementaires = merge(seances, 'parlementaires');
-      const personalites = merge(seances, 'personalites');
+      const personnalites = merge(seances, 'personalites');
       let dos = {
         id: nom,
         nom: dossier.key,
@@ -130,10 +136,7 @@ fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
         nb_mots: sum(seances, 'nb_mots'),
         nb_excl: sum(seances, 'nb_excl'),
 
-        parlementaires,
-        personalites,
-        nb_orateurs: Object.keys(parlementaires).length + Object.keys(personalites).length,
-    
+        nb_orateurs: Object.keys(parlementaires).length + Object.keys(personnalites).length,
 
         nb_didasc_neutres: sum(seances, 'nb_didasc_neutres'),
         nb_didasc_positives: sum(seances, 'nb_didasc_positives'),
