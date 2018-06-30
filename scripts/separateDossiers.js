@@ -26,6 +26,12 @@ const dossiersMap = dsv.tsvParse(fs.readFileSync(`${DATA_FOLDER}/dossiers_ids.ts
 
 const addSeance = function(seances, s) {
   s.pc_interruptions = s.nb_interruptions / s.interventions.length;
+  s.interventions.forEach((interv, idx) => {
+    let mini = Math.max(0, idx - 10),
+      maxi = Math.min(s.interventions.length, idx + 11),
+      slice = s.interventions.slice(mini, maxi);
+    interv.animation_rate = slice.reduce((res, i) => res + i.interruption, 0) / slice.reduce((res, i) => res + i.nb_mots, 0);
+  });
   seances.push(s);
 };
 
