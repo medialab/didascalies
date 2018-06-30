@@ -18,7 +18,10 @@ const OUTPUT_FOLDER = path.resolve(__dirname + '/../rififi/server/data/');
 const dossiersMap = dsv.tsvParse(fs.readFileSync(`${DATA_FOLDER}/dossiers_ids.tsv`, 'utf8'))
   .filter(d => d.nb_interventions > 10)
   .reduce((result, obj) => {
-    return Object.assign(result, { [obj.titre]: obj.id_dossier_an.replace("NULL", "") || null })
+    return Object.assign(result, { 
+      [obj.titre]: 
+      obj.id_dossier_an.replace("NULL", "") || null 
+    })
   }, {});
 
 const addSeance = function(seances, s) {
@@ -85,11 +88,21 @@ fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
         curSeance.interventions.push(i);
       });
       addSeance(seances, curSeance);
+
+      const sum = (items, key) => items.reduce((sum, item) => sum + item[key], 0);
       let dos = {
         id: nom,
         nom: dossier.key,
         id_an: dossiersMap[dossier.key] || null,
-        seances: seances
+        seances: seances,
+        // sum of nb cars and mots
+        nb_cars: sum(seances, 'nb_cars'),
+        nb_mots: sum(seances, 'nb_mots'),
+        nb_excl: sum(seances, 'nb_excl'),
+        nb_interruptions: sum(seances, 'nb_interruptions'),
+        profile_interruptions: seances.map(s => s.pc_interruptions),
+        // mean of nb interruptions
+        pc_interruptions: seances.reduce((sum, s) => sum + s.pc_interruptions , 0) / seances.length
       };
       dossiersMap[dossier.key] = dos;
       fs.writeFileSync(filename, JSON.stringify(dos), 'utf8');
@@ -97,5 +110,9 @@ fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
       delete dos.seances;
     })
   ))
+  .then(() => {
+    const liste = `${OUTPUT_FOLDER}/liste_dossiers.json`
+    console.log('writing', liste);
+    return fs.writeFile(liste, JSON.stringify(dossiersMap), 'utf8')
+  })
   .catch(console.error)
-  .then(() => fs.writeFileSync(`${OUTPUT_FOLDER}/liste_dossiers.json`, JSON.stringify(dossiersMap), 'utf8'))
