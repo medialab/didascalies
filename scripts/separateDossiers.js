@@ -118,7 +118,7 @@ fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
       }), {})
 
       const parlementaires = merge(seances, 'parlementaires');
-      const personalites = merge(seances, 'personalites');
+      const personnalites = merge(seances, 'personalites');
       let dos = {
         id: nom,
         nom: dossier.key,
@@ -130,10 +130,7 @@ fs.ensureDir(`${OUTPUT_FOLDER}/dossiers`)
         nb_mots: sum(seances, 'nb_mots'),
         nb_excl: sum(seances, 'nb_excl'),
 
-        parlementaires,
-        personalites,
-        nb_orateurs: Object.keys(parlementaires).length + Object.keys(personalites).length,
-    
+        nb_orateurs: Object.keys(parlementaires).length + Object.keys(personnalites).length,
 
         nb_didasc_neutres: sum(seances, 'nb_didasc_neutres'),
         nb_didasc_positives: sum(seances, 'nb_didasc_positives'),
