@@ -5,15 +5,17 @@ const TTip = require('react-tooltip');
 
 const Bloomer = require('bloomer');
 const {
-  Button
+  Button,
+  Box,
+  Column,
 } = Bloomer;
 
 const colors = {
-  positif: 'green',
-  negatif: 'red',
-  exclamation: 'brown',
-  neutre: 'lightgrey',
-  intervention: 'lightblue'
+  positif: '#71BF50',
+  negatif: '#D4613E',
+  exclamation: '#D46934',
+  neutre: '#F3CC4F',
+  intervention: '#529DCB'
 }
 
 const groups = [
@@ -153,7 +155,7 @@ class Profile extends React.Component {
     let lineStep = 0;
     return (
       <div style={style}>
-        <Button onClick={() => this.setState({playing: !this.state.playing})}>
+        <Button isColor={playing ? 'info' : ''} onClick={() => this.setState({playing: !this.state.playing})}>
           {playing ? 'Pause': 'Lecture'}
         </Button>
         <svg height={CELL * groups.length * 2} width={width}>
@@ -284,8 +286,8 @@ class Profile extends React.Component {
             Nombre de mots {temporalite === 'temporel' ? '(active)': ''}
           </Button>
         </div>
-        <div id="legend">
-        {
+        <Column id="legend">
+        <Box>{
           Object.keys(colors)
           .map(colorKey => (
             <div key={colorKey}>
@@ -301,7 +303,8 @@ class Profile extends React.Component {
             </div>
           ))
         }
-        </div>
+        </Box>
+        </Column>
         <TTip place="top" id="annotation" effect="solid" />
       </div>
     );

@@ -6,6 +6,7 @@ import {getFile} from './utils/client';
 import Layout from './views/Layout';
 import Home from './views/Home';
 import Dossier from './views/Dossier';
+import Liste from './views/Liste';
 
 import {
   BrowserRouter as Router,
@@ -26,6 +27,7 @@ class App extends Component {
         <Layout>
           <Switch>
             <Route exact path="/" component={Home} />
+            <Route exact path="/liste" component={Liste} />
             <Route exact path="/dossier/:dossierId" component={Dossier} />
           </Switch>
         </Layout>

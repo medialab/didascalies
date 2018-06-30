@@ -4,12 +4,15 @@ import {getFile} from '../utils/client';
 
 import PropTypes from 'prop-types';
 
+import {Link} from 'react-router-dom';
+
 import {
   Container,
   Navbar,
   NavbarBrand,
   NavbarItem,
   Icon,
+  Input,
   Control,
   Button,
   Field,
@@ -26,7 +29,7 @@ import {
 export default class Layout extends Component {
 
   static childContextTypes = {
-    dossiers: PropTypes.array,
+    dossiers: PropTypes.object,
     listeDeputes: PropTypes.array,
     placesAssemblee: PropTypes.object,
     groupes: PropTypes.object,
@@ -35,11 +38,12 @@ export default class Layout extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      dossiers: [],
+      dossiers: {},
       listeDeputes: undefined,
       placesAssemblee: undefined,
       groupes: undefined,
       navIsActive: false,
+      searchTerm: ''
     };
   }
 
@@ -51,10 +55,10 @@ export default class Layout extends Component {
   })
 
   componentDidMount() {
-    getFile('/dossiers/liste.txt')
-      .then(str => {
+    getFile('/liste_dossiers.json')
+      .then(dossiers => {
         this.setState({
-          dossiers: str.split('\n').map(s => s.trim())
+          dossiers
         })
       })
       .catch(console.error)
@@ -93,8 +97,9 @@ export default class Layout extends Component {
   render = () => {
     const {
       state: {
-        dossiers,
+        dossiers = {},
         navIsActive,
+        searchTerm = ''
       },
       props: {
         children
@@ -103,6 +108,7 @@ export default class Layout extends Component {
 
     } = this;
 
+    const dossiersList = Object.keys(dossiers).map(key => dossiers[key]).filter(d => d);
     return (
       <div className="Layout">
         <Navbar>
@@ -119,15 +125,30 @@ export default class Layout extends Component {
               <NavbarStart>
                   <NavbarItem href='/'>Du rififi à l'assemblée</NavbarItem>
                   <NavbarItem hasDropdown isHoverable>
-                      <NavbarLink href='/'>Dossiers</NavbarLink>
-                      <NavbarDropdown>
+                      <NavbarItem>Dossiers</NavbarItem>
+                      <NavbarDropdown  style={{maxHeight: '20rem', overflow: 'auto'}}>
+                        <NavbarItem>
+                          <Input value={searchTerm} onChange={e => this.setState({searchTerm: e.target.value})} />
+                        </NavbarItem>
                         {
-                          dossiers.map((dossier, index) => {
-                            return <NavbarItem key={index} href={`/dossier/${dossier}`}>{dossier}</NavbarItem>
+                          dossiersList
+                          .filter(d => {
+                            return d.nom && d.nom.toLowerCase().indexOf(searchTerm) > -1
+                          })
+                          .map((dossier, index) => {
+                            return <NavbarItem 
+                                    key={index} 
+                                    >
+                                      <Link to={`/dossier/${dossier.id}`}>
+                                        {dossier.nom}
+                                      </Link>
+                                    </NavbarItem>
                           })
                         }
                       </NavbarDropdown>
                   </NavbarItem>
+                  <NavbarItem><Link to={'/liste'}>Vue synoptique</Link></NavbarItem>
+
               </NavbarStart>
               <NavbarEnd>
                   <NavbarItem href="https://github.com/medialab" isHidden='touch'>

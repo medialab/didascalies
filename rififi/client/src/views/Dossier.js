@@ -5,12 +5,14 @@ import {getFile} from '../utils/client';
  
 import Profile from '../components/Profile';
 import Assemblee from '../components/Assemblee';
+import DossierChrono from '../components/DossierChrono';
 
 import {
   Container,
   Columns,
   Column,
   Title,
+  Level,
 } from 'bloomer';
 
 class App extends Component {
@@ -31,7 +33,7 @@ class App extends Component {
 
 
   getData = dossierId => {
-    getFile(`/dossiers/${dossierId}`)
+    getFile(`dossiers/${dossierId}.json`)
     .then(data => {
         this.setState({
           data: data,
@@ -130,19 +132,24 @@ class App extends Component {
     if (currentStepData && currentStepData.type !== 'didascalie') {
       currentDepute = listeDeputes.find(d => d.depute.nom === currentStepData.parlementaire);
     }
-    console.log(data);
+
     return (
       <Container>
           
         <Columns>
           <Column isSize={8}>
+
             {data &&<Title isSize={1}>
-                {data.id_an ? <a href={`https://www.lafabriquedelaloi.fr/articles.html?loi=15-${data.id_an}`}>
+                {data.id_an ? <a target="blank" href={`https://www.lafabriquedelaloi.fr/articles.html?loi=15-${data.id_an}`}>
                   {data.nom}
                 </a>
                 : data.nom
               }
             </Title>}
+            {
+              data && data.seances.length > 1 &&
+              <DossierChrono seances={data.seances} />
+            }
             {
               data ?
                 data
@@ -150,7 +157,7 @@ class App extends Component {
                 .map((seance, seanceIndex) => {
                   const date = `${seance.interventions[0].date} ${seance.interventions[0].moment}`;
 
-                  return (<div
+                  return (<Column
                   key={seanceIndex} 
                   >
                     <Title isSize={2}>
@@ -164,7 +171,7 @@ class App extends Component {
                     onOut={handleOutStep}
                     id={seanceIndex}
                     data={seance.interventions} />
-                  </div>
+                  </Column>
                  )
                 })
                 
@@ -185,22 +192,24 @@ class App extends Component {
             {
               currentStepData ?
               <div>
-                <Title isSize={3}>
+                {currentStepData.type !== 'didascalie' && <Title isSize={3}>
                   {`${currentStepData.parlementaire !== 'NULL' ?
                     currentStepData.parlementaire :
                     currentStepData.nom
                   } (${currentStepData.groupes.join()})`}
-                </Title>
+                </Title>}
                 {
+                  
                   currentDepute ?
                     <img src={`https://www.nosdeputes.fr/depute/photo/${currentDepute.depute.slug}/60`} />
                   : null
+                  
                 }
 
                 <div
                   dangerouslySetInnerHTML={{
                     __html: currentStepData.type === 'elocution' ? 
-                              currentStepData.intervention : currentStepData.didascalie
+                              currentStepData.intervention : `<i>${currentStepData.didascalie}</i>`
                   }}
                 />
               </div> : null
