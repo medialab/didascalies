@@ -20,16 +20,16 @@ const colors = {
 }
 
 const groups = [
-  'présidence',
-  'gouvernement',
+  'MODEM',
+  'LREM',
   'commission',
+  'gouvernement',
+  'présidence',
+  'UAI',
+  'NG',
+  'LR',  
   'GDR',
   'LFI',
-  'NG',
-  'LREM',
-  'MODEM',
-  'UAI',
-  'LR',
   'NI'
 ];
 
@@ -267,6 +267,7 @@ class Profile extends React.Component {
                             y1={y1}
                             y2={y2}
                             stroke={color}
+                            strokeOpacity={0.4}
                           />
                         )
                       })

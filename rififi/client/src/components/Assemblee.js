@@ -93,7 +93,7 @@ class Assemblee extends React.Component {
           }
           <ellipse
             cx={scaleX(xExtent[1]/2)}
-            cy={scaleY(yExtent[1])}
+            cy={scaleY(yExtent[1] * .6)}
             data-tip={'gouvernement'}
             data-for='assemblee'
             rx={rad}

@@ -8,6 +8,7 @@ import Assemblee from '../components/Assemblee';
 import DossierChrono from '../components/DossierChrono';
 
 import {
+  Button,
   Container,
   Columns,
   Column,
@@ -28,6 +29,8 @@ class App extends Component {
     this.state = {
       data: undefined,
       currentStep: 0,
+      seanceIndex: 0,
+      currentSeanceIndex: 0,
     };
   }
 
@@ -45,6 +48,19 @@ class App extends Component {
 
   componentDidMount() {
 
+    const {
+      props: {
+        match: {
+          params: {
+            dossierId
+          }
+        }
+      }
+    } = this;
+
+    this.getData(dossierId);
+  }
+  componentWillReceiveProps = () => {
     const {
       props: {
         match: {
@@ -126,6 +142,10 @@ class App extends Component {
       handleUpdateState,
     } = this;
 
+    if (!data || !listeDeputes) return null;
+
+    const nextSeance = currentSeanceIndex + 1 < data.seances.length ? data.seances[currentSeanceIndex + 1] : undefined;
+    const prevSeance = currentSeanceIndex - 1 >= 0 ? data.seances[currentSeanceIndex - 1] : undefined;
 
     let currentStepData = currentStep !== undefined && currentSeanceIndex !== undefined ? data.seances[currentSeanceIndex].interventions[currentStep] : undefined;
     let currentDepute;
@@ -138,22 +158,51 @@ class App extends Component {
           
         <Columns>
           <Column isSize={8}>
-
-            {data &&<Title isSize={1}>
+            {data &&
+              <Title isSize={1}>
                 {data.id_an ? <a target="blank" href={`https://www.lafabriquedelaloi.fr/articles.html?loi=15-${data.id_an}`}>
                   {data.nom}
                 </a>
                 : data.nom
               }
             </Title>}
-            {
-              data && data.seances.length > 1 &&
-              <DossierChrono seances={data.seances} />
-            }
+            <Column>
+              <Title isSize={3}>
+                Évolution du pourcentage d'interruptions entre les séances
+              </Title>
+              {
+                data && data.seances.length > 1 &&
+                <DossierChrono seances={data.seances} />
+              }
+            </Column>
+            <Columns>
+              {
+                prevSeance &&
+                <Column>
+                  <Title isSize={2}>
+                    <Button onClick={() => this.setState({currentSeanceIndex: currentSeanceIndex - 1})}>
+                      {'<'} Séance précédente ({currentSeanceIndex - 1 + 1}) du {new Date(`${prevSeance.interventions[0].date} ${prevSeance.interventions[0].moment}`).toLocaleString()}
+                    </Button>
+                  </Title>
+                </Column>
+              }
+              {
+                nextSeance &&
+                <Column>
+                  <Title isSize={2}>
+                    <Button onClick={() => this.setState({currentSeanceIndex: currentSeanceIndex + 1})}>
+                      > Séance suivante ({currentSeanceIndex + 1 + 1}) du {new Date(`${nextSeance.interventions[0].date} ${nextSeance.interventions[0].moment}`).toLocaleString()}
+                    </Button>
+                  </Title>
+                </Column>
+              }
+            </Columns>
+              
             {
               data ?
                 data
                 .seances
+                .filter((d, i) => i === currentSeanceIndex)
                 .map((seance, seanceIndex) => {
                   const date = `${seance.interventions[0].date} ${seance.interventions[0].moment}`;
 
@@ -161,7 +210,7 @@ class App extends Component {
                   key={seanceIndex} 
                   >
                     <Title isSize={2}>
-                      Séance du {new Date(date).toLocaleString()}
+                      Séance ({currentSeanceIndex + 1 }) du {new Date(date).toLocaleString()}
                     </Title>
                     <Profile
                     onUpdateStep={handleUpdateState}
@@ -178,6 +227,7 @@ class App extends Component {
               :
                 'Chargement'
             }
+            
             </Column>
             <Column style={{position: 'fixed', left: '66%', top: '10rem'}} isSize={4}>
             {

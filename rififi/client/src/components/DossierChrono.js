@@ -33,9 +33,9 @@ class DossierChrono extends React.Component {
     const height = width / 5;
 
     const ticks = [];
-    for(let i = 0 ; i < seances.length ; i ++) ticks.push(i);
+    for(let i = 1 ; i < seances.length + 1 ; i ++) ticks.push(i);
     const data = seances.map((seance, index) => ({
-              x: index,
+              x: index + 1,
               y: seance.pc_interruptions * 100
             }
             ));

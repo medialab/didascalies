@@ -92,7 +92,7 @@ export default class Liste extends Component {
     const maxPctPositif = max(dossiersList, d => d.nb_didasc_positives / d.nb_mots);
     const maxPctNegatif = max(dossiersList, d => d.nb_interruptions / d.nb_mots)
     const maxPctNeutre = max(dossiersList, d => d.nb_didasc_neutres / d.nb_mots)
-    const maxNbMots = max(dossiersList, d => d.nb_mots)
+    const maxNbSeances = max(dossiersList, d => d.nb_seances)
 
     const scalePos = scaleLinear().domain([0, maxPctPositif]).range([0, 1]);
     const scaleNeg = scaleLinear().domain([0, maxPctNegatif]).range([0, 1]);
@@ -124,11 +124,10 @@ export default class Liste extends Component {
       label: 'Longueur des débats',
       values: visibleDossiersList.map((d, i) => ({
         x: 'd'+i,
-        y: d.nb_mots
+        y: d.nb_seances
       })),
 
     }];
-    console.log('bar data', barData);
     return (
       <Container> 
       <Columns>
@@ -151,13 +150,13 @@ export default class Liste extends Component {
           {barData[0].values.length ? 
           <Level>
             <Column>
-              <Title isSize={4}>Nombre de mots</Title>
+              <Title isSize={4}>Nombre de séances</Title>
               <BarChartContainer 
                 data={barData}
                 xAxis={{tickArguments: []}}
                 yAxis={{
-                  label: "nb mots", 
-                  tickArguments: [0, maxNbMots],
+                  label: "nb séances", 
+                  tickArguments: [0, maxNbSeances],
                   tickFormat: d => parseInt(d)
                 }}
               />
