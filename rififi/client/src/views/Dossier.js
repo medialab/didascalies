@@ -6,9 +6,11 @@ import {getFile} from '../utils/client';
 import Profile from '../components/Profile';
 import Assemblee from '../components/Assemblee';
 import DossierChrono from '../components/DossierChrono';
+import LineChartContainer from '../components/LineChartContainer';
 
 import {
   Button,
+  Box,
   Container,
   Columns,
   Column,
@@ -74,7 +76,8 @@ class App extends Component {
     this.getData(dossierId);
   }
 
-  updateCurrentStep = (index, seanceIndex) => {
+  updateCurrentStep = (index/*, seanceIndex*/) => {
+    const seanceIndex = this.state.currentSeanceIndex;
     const step = this.state.data.seances[seanceIndex].interventions[index];
     const {type, parlementaire, groupes} = step;
     if (type === 'elocution') {
@@ -105,7 +108,7 @@ class App extends Component {
   }
 
   handleOverStep = (step, index, seanceIndex) => {
-    this.updateCurrentStep(index, seanceIndex);   
+    this.updateCurrentStep(index);   
   }
 
   handleOutStep = () => {
@@ -206,12 +209,28 @@ class App extends Component {
                 .map((seance, seanceIndex) => {
                   const date = `${seance.interventions[0].date} ${seance.interventions[0].moment}`;
 
-                  return (<Column
+                  return (<Box
                   key={seanceIndex} 
                   >
                     <Title isSize={2}>
                       Séance ({currentSeanceIndex + 1 }) du {new Date(date).toLocaleString()}
                     </Title>
+                    <Title isSize={4}>
+                      Évolution de l'animation du débat
+                    </Title>
+                    <div style={{marginLeft: '8%', marginRight: '10%'}}>
+                    <LineChartContainer
+                      data={[{
+                      label: '', 
+                      values: seance.interventions.map((d, i) => ({
+                        x: i,
+                        y: d.animation_rate
+                      }))}]
+                      }
+                      xAxis={{tickValues: []}}
+                      yAxis={{tickValues: []}}
+                    />
+                    </div>
                     <Profile
                     onUpdateStep={handleUpdateState}
                     currentStep={currentStep}
@@ -220,7 +239,7 @@ class App extends Component {
                     onOut={handleOutStep}
                     id={seanceIndex}
                     data={seance.interventions} />
-                  </Column>
+                  </Box>
                  )
                 })
                 

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {max} from 'd3-array';
 import {scaleLinear} from 'd3-scale';
-const {LineChart, BarChart} = require('react-d3-components');
+const {BarChart} = require('react-d3-components');
 import {
   Hero,
   HeroBody,

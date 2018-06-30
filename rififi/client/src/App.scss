@@ -20,7 +20,8 @@ $bgblur: 50px;
 
 rect,
 ellipse,
-text{
+text,
+line{
   transition: all .2s ease;
 }
 
