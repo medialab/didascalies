@@ -17,7 +17,7 @@ class LineChartContainer extends Component {
       }
     } = this;
 
-    const height = width / 3;
+    const height = width / 5;
     return (
       <div>
          <LineChart

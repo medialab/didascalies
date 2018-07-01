@@ -33,14 +33,15 @@ class DossierCard extends React.Component {
       size: {width, monitorHeight},
       dossier,
       style,
+      onMouseOver,
+      onMouseOut,
       ...props
      } = this.props;
 
 
     const height = width / 5;
-
     return (
-                <Column>
+                <Column onMouseOver={() => onMouseOver(dossier)} onMouseOut={() => onMouseOut(dossier)}>
                   <Card>
                     <CardHeader>
                         <CardHeaderTitle>
@@ -59,7 +60,7 @@ class DossierCard extends React.Component {
                           {dossier.nb_interv} interventions
                         </div>
                         <div>
-                          {parseInt(dossier.pc_interruptions * 100)}% d'interruptions
+                          {dossier.nb_orateurs} orateurs
                         </div>
                       </Level>
                       <Level>
@@ -75,7 +76,7 @@ class DossierCard extends React.Component {
                           width={width * .9}
                           height={height}
                           yAxis={{
-                            label: "interruptions",
+                            label: "activité",
                             tickValues: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100],
                             tickFormat: x => { return parseInt(x) + '%'; }
                           }}

@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import {max} from 'd3-array';
+import {max, extent} from 'd3-array';
 import {scaleLinear} from 'd3-scale';
 const {BarChart} = require('react-d3-components');
 import {
+  Button,
   Hero,
   HeroBody,
   Container,
@@ -16,10 +17,12 @@ import {
   CardContent,
   CardHeader,
   CardHeaderTitle,
+  Label,
   Level,
   Control,
   Radio,
   Column,
+  Select,
 } from 'bloomer';
 
 import {
@@ -58,11 +61,16 @@ export default class Liste extends Component {
             return 1;
           }
           return -1;
-        case 'circulation':
-          if (a.nb_orateurs / a.nb_interv > b.nb_orateurs / b.nb_interv) {
+        case 'hilarite':
+          if (a.nb_rires < b.nb_rires) {
             return 1;
           }
           return -1;
+        case 'circulation':
+          if (a.nb_orateurs / a.nb_interv > b.nb_orateurs / b.nb_interv) {
+            return -1;
+          }
+          return 1;
         case 'title':
         default:
           if (a.nom > b.nom) {
@@ -78,6 +86,8 @@ export default class Liste extends Component {
       state: {
         sortMode,
         searchStr = '',
+        highlightedDossier,
+        hoveredDossier,
       },
       context: {
         dossiers
@@ -89,84 +99,127 @@ export default class Liste extends Component {
     let visibleDossiersList = dossiersList
       .filter(d => searchStr.length ? d.nom.toLowerCase().indexOf(searchStr) > -1 : true)
     visibleDossiersList = goSort(visibleDossiersList, sortMode);
-    const maxPctPositif = max(dossiersList, d => d.nb_didasc_positives / d.nb_mots);
-    const maxPctNegatif = max(dossiersList, d => d.nb_interruptions / d.nb_mots)
-    const maxPctNeutre = max(dossiersList, d => d.nb_didasc_neutres / d.nb_mots)
-    const maxNbSeances = max(dossiersList, d => d.nb_seances)
 
-    const scalePos = scaleLinear().domain([0, maxPctPositif]).range([0, 1]);
-    const scaleNeg = scaleLinear().domain([0, maxPctNegatif]).range([0, 1]);
-    const scaleNeutre = scaleLinear().domain([0, maxPctNeutre]).range([0, 1]);
+    const scalePos = scaleLinear().domain(extent(dossiersList, d => (d.nb_didasc_positives + d.nb_interruptions_positives) / d.nb_mots)).range([0, 1]);
+    const scaleNeg = scaleLinear().domain(extent(dossiersList, d => (d.nb_interruptions_negatives + d.nb_didasc_negatives) / d.nb_mots)).range([0, 1]);
+    const scaleRires = scaleLinear().domain(extent(dossiersList, d => d.nb_rires / d.nb_mots)).range([0, 1]);
+    const scaleMurmures = scaleLinear().domain(extent(dossiersList, d => d.nb_murmures / d.nb_mots)).range([0, 1]);
+    const scaleCirculation = scaleLinear().domain(extent(dossiersList, d => d.nb_orateurs / d.nb_interv)).range([0, 1]);
+    const radarVariables = [
+      {
+        key: 'pct_soutien', 
+        label: 'Réactions de soutien',
+      },
+      
+      {
+        key: 
+        'rires', 
+        label: 'Rires et sourires',
+      },
+      {
+        key: 
+        'murmures', 
+        label: 'Murmures',
+      },
+      {
+        key: 'pct_agression', 
+        label: 'Réactions d\'agression',
+      },
+      {
+        key: 
+        'circulation', 
+        label: 'Circulation parole',
+      },
+    ];
 
     const radarData = {
-      variables: [
-        {key: 'pct_positif', label: 'Réactions positives'},
-        {key: 'pct_interruptions', label: 'Interruptions'},
-        {key: 'pct_neutre', label: 'Réactions diverses'},
-      ],
-      sets: visibleDossiersList.map(d => {
+      variables: radarVariables,
+      sets: visibleDossiersList
+      .filter(d => {
+        if (hoveredDossier) {
+          return d.id === hoveredDossier;
+        }
+        return true;
+      })
+      .map(d => {
         return {
           key: d.id,
           label: d.nom,
           values: {
-            pct_positif: scalePos(d.nb_didasc_positives / d.nb_mots),
-            pct_interruptions: scaleNeg(d.nb_interruptions / d.nb_mots),
-            pct_neutre: scaleNeutre(d.nb_didasc_neutres / d.nb_mots),
+            pct_soutien: scalePos((d.nb_didasc_positives + d.nb_interruptions_positives) / d.nb_mots),
+            pct_agression: scaleNeg((d.nb_didasc_negatives + d.nb_interruptions_negatives) / d.nb_mots),
+            rires: scaleRires(d.nb_rires / d.nb_mots),
+            murmures: scaleMurmures(d.nb_murmures / d.nb_mots),
+            circulation: scaleCirculation(d.nb_orateurs / d.nb_interv),
           }
         }
       })
     };
-    // const barData =  [{
-    //     label: 'somethingA',
-    //     values: [{x: 'SomethingA', y: 10}, {x: 'SomethingB', y: 4}, {x: 'SomethingC', y: 3}]
-    // }];
-    const barData = [{
-      label: 'Longueur des débats',
-      values: visibleDossiersList.map((d, i) => ({
-        x: 'd'+i,
-        y: d.nb_seances
-      })),
 
-    }];
+
+    const onRadarHover = point => {
+      this.setState({
+        highlightedDossier: point ? point.setKey : undefined
+      })
+    };
+    const onDossierOver = dossier => {
+      this.setState({
+        hoveredDossier: dossier.id
+      })
+    }
+    const onDossierOut = dossier => {
+      this.setState({
+        hoveredDossier: undefined,
+      })
+    }
     return (
       <Container> 
       <Columns>
       <Column isSize={4} style={{overflow: 'auto', position: 'fixed', top: '5rem', left: 0, height: 'calc(100% - 5rem)'}}>
           <Level>
-            <form>
-              <Field>
-                <Input placeHolder={'chercher un dossier'} value={searchStr} onChange={e => this.setState({searchStr: e.target.value})} />
-              </Field>
-              <Field>
-                  <Control value={sortMode}>
-                      <Radio onClick={() => this.setState({sortMode: 'title'})} checked={sortMode === 'title'} name="title">Titre</Radio>
-                      <Radio onClick={() => this.setState({sortMode: 'nb_seances'})} checked={sortMode === 'nb_seances'} name="nb_seances">Nombre de séances</Radio>
-                      <Radio onClick={() => this.setState({sortMode: 'pc_interruptions'})} checked={sortMode === 'pc_interruptions'} name="pc_interruptions">% d'interruptions</Radio>
-                      <Radio onClick={() => this.setState({sortMode: 'circulation'})} checked={sortMode === 'circulation'} name="circulation">Circulation de la parole (orateurs / nb interventions)</Radio>
-                  </Control>
-              </Field>
-            </form>
-          </Level>
-          {barData[0].values.length ? 
-          <Level>
             <Column>
-              <Title isSize={4}>Nombre de séances</Title>
-              <BarChartContainer 
-                data={barData}
-                xAxis={{tickArguments: []}}
-                yAxis={{
-                  label: "nb séances", 
-                  tickArguments: [0, maxNbSeances],
-                  tickFormat: d => parseInt(d)
-                }}
-              />
+              <form>
+                <Field>
+                  <Input placeholder={'chercher un dossier'} value={searchStr} onChange={e => this.setState({searchStr: e.target.value})} />
+                </Field>
+                {<Field>
+                <Label>Trier par</Label>
+                    <Control>
+                        <Select value={sortMode} onChange={e => this.setState({sortMode: e.target.value})}>
+                          <option value={'title'} checked={sortMode === 'title'}>
+                            titre
+                          </option>
+                          <option value={'nb_seances'} checked={sortMode === 'nb_seances'}>
+                            nombre de séances
+                          </option>
+                          <option value={'pc_interruptions'} checked={sortMode === 'pc_interruptions'}>
+                            animation
+                          </option>
+                          <option value={'circulation'} checked={sortMode === 'circulation'}>
+                            circulation de la parole
+                          </option>
+                          <option value={'hilarite'} checked={sortMode === 'hilarite'}>
+                            hilarité
+                          </option>
+                        </Select>
+                    </Control>
+                </Field>}
+                 
+              </form>
             </Column>
-          </Level> : null}
+          </Level>
+          
           {visibleDossiersList.length > 0 && 
           <Level>
             <Column>
-              <Title isSize={4}>Typologies de réactions</Title>
-              <RadarContainer domainMax={1} data={radarData} />
+              <RadarContainer 
+                domainMax={1} 
+                data={radarData} 
+                highlighted={highlightedDossier}
+              />
+             {highlightedDossier && <Button onClick={() => onRadarHover(undefined)}>
+                  Réinitialiser
+                </Button>}
             </Column>
           </Level>
           }
@@ -174,9 +227,14 @@ export default class Liste extends Component {
         <Column isSize={8} isOffset={4}>
           {
             visibleDossiersList
+            .filter(d => {
+              if (highlightedDossier) {
+                return d.id === highlightedDossier;
+              } else return true;
+            })
             .map((dossier, index) => {
               return (
-                <DossierCard dossier={dossier} key={index} />
+                <DossierCard onMouseOver={onDossierOver} onMouseOut={onDossierOut} dossier={dossier} key={index} />
               )
             })
           }

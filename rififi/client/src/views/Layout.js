@@ -125,7 +125,7 @@ export default class Layout extends Component {
               <NavbarStart>
                   <NavbarItem href='/'>Du rififi à l'assemblée</NavbarItem>
                   <NavbarItem hasDropdown isHoverable>
-                      <NavbarItem>Dossiers</NavbarItem>
+                      <NavbarItem>Accéder à un dossier</NavbarItem>
                       <NavbarDropdown  style={{maxHeight: '20rem', overflow: 'auto'}}>
                         <NavbarItem>
                           <Input value={searchTerm} onChange={e => this.setState({searchTerm: e.target.value})} />
@@ -147,15 +147,15 @@ export default class Layout extends Component {
                         }
                       </NavbarDropdown>
                   </NavbarItem>
-                  <NavbarItem><Link to={'/liste'}>Vue synoptique</Link></NavbarItem>
+                  <NavbarItem><Link to={'/liste'}>Tous les dossiers</Link></NavbarItem>
+                  <NavbarItem><Link to={'/acteurs'}>Tous les acteurs</Link></NavbarItem>
+                  <NavbarItem><Link to={'/methodologie'}>Méthodologie</Link></NavbarItem>
+                  <NavbarItem><Link to={'/a-propos'}>À propos</Link></NavbarItem>
 
               </NavbarStart>
               <NavbarEnd>
-                  <NavbarItem href="https://github.com/medialab" isHidden='touch'>
+                  <NavbarItem href="https://github.com/medialab/didascalies" isHidden='touch'>
                       <Icon className='fa fa-github' />
-                  </NavbarItem>
-                  <NavbarItem href="https://twitter.com/AlgusDark" isHidden='touch'>
-                      <Icon className='fa fa-twitter' style={{ color: '#55acee' }} />
                   </NavbarItem>
                   <NavbarItem>
                       <Field isGrouped>
@@ -174,8 +174,7 @@ export default class Layout extends Component {
           <Level/>
           <Level/>
           <Level/>
-          <Level/>
-          <div>
+          <div id="container">
             {children}
           </div>
       </div>

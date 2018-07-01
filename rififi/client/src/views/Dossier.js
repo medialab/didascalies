@@ -1,5 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import TTip from 'react-tooltip';
+
+import {scaleLinear} from 'd3-scale';
+import {extent} from 'd3-array';
 
 import {getFile} from '../utils/client';
  
@@ -7,6 +11,8 @@ import Profile from '../components/Profile';
 import Assemblee from '../components/Assemblee';
 import DossierChrono from '../components/DossierChrono';
 import LineChartContainer from '../components/LineChartContainer';
+import ActorsSpace from '../components/ActorsSpace';
+import RadarContainer from '../components/RadarContainer';
 
 import {
   Button,
@@ -18,12 +24,15 @@ import {
   Level,
 } from 'bloomer';
 
+const capitalize = str => str[0].toUpperCase() + str.slice(1)
+
 class App extends Component {
 
   static contextTypes = {
     listeDeputes: PropTypes.array,
     placesAssemblee: PropTypes.object,
     groupes: PropTypes.object,
+    dossiers: PropTypes.object,
   }
 
   constructor(props) {
@@ -62,18 +71,27 @@ class App extends Component {
 
     this.getData(dossierId);
   }
-  componentWillReceiveProps = () => {
+  componentWillReceiveProps = nextProps => {
     const {
-      props: {
         match: {
           params: {
-            dossierId
+            dossierId: prevId
           }
         }
-      }
-    } = this;
+    } = this.props;
+    const {
+        match: {
+          params: {
+            dossierId: nextId
+          }
+        }
+    } = nextProps;
 
-    this.getData(dossierId);
+
+
+    if (prevId !== nextId) {
+      this.getData(nextId);
+    }
   }
 
   updateCurrentStep = (index/*, seanceIndex*/) => {
@@ -138,7 +156,16 @@ class App extends Component {
       context: {
         listeDeputes,
         placesAssemblee,
-        groupes
+        groupes,
+        dossiers,
+      },
+      props: {
+        match: {
+          params: {
+            dossierId,
+          }
+        },
+        history,
       },
       handleOverStep,
       handleOutStep,
@@ -156,136 +183,121 @@ class App extends Component {
       currentDepute = listeDeputes.find(d => d.depute.nom === currentStepData.parlementaire);
     }
 
+    const dossiersList = Object.keys(dossiers || {})
+      .map(key => dossiers[key]).filter(d => d && d.nb_seances)
+    let visibleDossiersList = dossiersList;
+    
+    const scalePos = scaleLinear().domain(extent(dossiersList, d => (d.nb_didasc_positives + d.nb_interruptions_positives) / d.nb_mots)).range([0, 1]);
+    const scaleNeg = scaleLinear().domain(extent(dossiersList, d => (d.nb_interruptions_negatives + d.nb_didasc_negatives) / d.nb_mots)).range([0, 1]);
+    const scaleRires = scaleLinear().domain(extent(dossiersList, d => d.nb_rires / d.nb_mots)).range([0, 1]);
+    const scaleMurmures = scaleLinear().domain(extent(dossiersList, d => d.nb_murmures / d.nb_mots)).range([0, 1]);
+    const scaleCirculation = scaleLinear().domain(extent(dossiersList, d => d.nb_orateurs / d.nb_interv)).range([0, 1]);
+    const radarVariables = [
+      {
+        key: 'pct_soutien', 
+        label: 'Réactions de soutien',
+      },
+      
+      {
+        key: 
+        'rires', 
+        label: 'Rires et sourires',
+      },
+      {
+        key: 
+        'murmures', 
+        label: 'Murmures',
+      },
+      {
+        key: 'pct_agression', 
+        label: 'Réactions d\'agression',
+      },
+      {
+        key: 
+        'circulation', 
+        label: 'Circulation parole',
+      },
+    ];
+
+    const radarData = {
+      variables: radarVariables,
+      sets: [data]
+      .map(d => {
+        return {
+          key: d.id,
+          label: d.nom,
+          values: {
+            pct_soutien: scalePos((d.nb_didasc_positives + d.nb_interruptions_positives) / d.nb_mots),
+            pct_agression: scaleNeg((d.nb_didasc_negatives + d.nb_interruptions_negatives) / d.nb_mots),
+            rires: scaleRires(d.nb_rires / d.nb_mots),
+            murmures: scaleMurmures(d.nb_murmures / d.nb_mots),
+            circulation: scaleCirculation(d.nb_orateurs / d.nb_interv),
+          }
+        }
+      })
+    };
+
     return (
       <Container>
           
         <Columns>
           <Column isSize={8}>
             {data &&
-              <Title isSize={1}>
+              <Title isSize={3}>
                 {data.id_an ? <a target="blank" href={`https://www.lafabriquedelaloi.fr/articles.html?loi=15-${data.id_an}`}>
-                  {data.nom}
+                  {capitalize(data.nom)}
                 </a>
-                : data.nom
+                : capitalize(data.nom)
               }
             </Title>}
+            <Title isSize={2}>
+              <Button isColor={'primary'} onClick={() => history.push(`/dossier/${dossierId}/seance/1`)}>
+                Consulter les séances
+              </Button>
+            </Title>
+            {
+                data && data.seances.length > 1 &&
+              <Column>
+                <Title isSize={3}>
+                  Évolution du pourcentage d'animation entre les séances
+                </Title>
+                <DossierChrono seances={data.seances} />
+              </Column>
+            }
             <Column>
               <Title isSize={3}>
-                Évolution du pourcentage d'interruptions entre les séances
+                  Acteurs des débats
+                </Title>
+              <ActorsSpace
+                colors={CONFIG.eventsColors} 
+                orateurs={Object.keys(data.orateurs).map(k => data.orateurs[k])}
+                groups={CONFIG.parlementaryGroups}
+              />
+            </Column>
+          </Column>
+          <Column isSize={4}>
+            <RadarContainer 
+              domainMax={1} 
+              data={radarData} 
+            />
+            <Column>
+              <Title isSize={4}>
+                Séances
               </Title>
               {
-                data && data.seances.length > 1 &&
-                <DossierChrono seances={data.seances} />
-              }
-            </Column>
-            <Columns>
-              {
-                prevSeance &&
-                <Column>
-                  <Title isSize={2}>
-                    <Button onClick={() => this.setState({currentSeanceIndex: currentSeanceIndex - 1})}>
-                      {'<'} Séance précédente ({currentSeanceIndex - 1 + 1}) du {new Date(`${prevSeance.interventions[0].date} ${prevSeance.interventions[0].moment}`).toLocaleString()}
+                data.seances.map((seance, seanceIndex) => {
+                  return <Level>
+                  <Button key={seanceIndex} isColor={'info'} onClick={() => history.push(`/dossier/${dossierId}/seance/${seanceIndex + 1}`)}>
+                      Séance du {new Date(`${seance.interventions[0].date} ${seance.interventions[0].moment}`).toLocaleString()}
                     </Button>
-                  </Title>
-                </Column>
-              }
-              {
-                nextSeance &&
-                <Column>
-                  <Title isSize={2}>
-                    <Button onClick={() => this.setState({currentSeanceIndex: currentSeanceIndex + 1})}>
-                      > Séance suivante ({currentSeanceIndex + 1 + 1}) du {new Date(`${nextSeance.interventions[0].date} ${nextSeance.interventions[0].moment}`).toLocaleString()}
-                    </Button>
-                  </Title>
-                </Column>
-              }
-            </Columns>
-              
-            {
-              data ?
-                data
-                .seances
-                .filter((d, i) => i === currentSeanceIndex)
-                .map((seance, seanceIndex) => {
-                  const date = `${seance.interventions[0].date} ${seance.interventions[0].moment}`;
-
-                  return (<Box
-                  key={seanceIndex} 
-                  >
-                    <Title isSize={2}>
-                      Séance ({currentSeanceIndex + 1 }) du {new Date(date).toLocaleString()}
-                    </Title>
-                    <Title isSize={4}>
-                      Évolution de l'animation du débat
-                    </Title>
-                    <div style={{marginLeft: '8%', marginRight: '10%'}}>
-                    <LineChartContainer
-                      data={[{
-                      label: '', 
-                      values: seance.interventions.map((d, i) => ({
-                        x: i,
-                        y: d.animation_rate
-                      }))}]
-                      }
-                      xAxis={{tickValues: []}}
-                      yAxis={{tickValues: []}}
-                    />
-                    </div>
-                    <Profile
-                    onUpdateStep={handleUpdateState}
-                    currentStep={currentStep}
-                    seanceIndex={seanceIndex}
-                    onHover={handleOverStep}
-                    onOut={handleOutStep}
-                    id={seanceIndex}
-                    data={seance.interventions} />
-                  </Box>
-                 )
+                    </Level>
                 })
-                
-              :
-                'Chargement'
-            }
-            
+              }
             </Column>
-            <Column style={{position: 'fixed', left: '66%', top: '10rem'}} isSize={4}>
-            {
-              listeDeputes && placesAssemblee &&
-              <Assemblee
-                listeDeputes={listeDeputes}
-                placesAssemblee={placesAssemblee}
-                groupes={groupes}
-                highlight={highlightedParlementaires}
-              />
-            }
-            {
-              currentStepData ?
-              <div>
-                {currentStepData.type !== 'didascalie' && <Title isSize={3}>
-                  {`${currentStepData.parlementaire !== 'NULL' ?
-                    currentStepData.parlementaire :
-                    currentStepData.nom
-                  } (${currentStepData.groupes.join()})`}
-                </Title>}
-                {
-                  
-                  currentDepute ?
-                    <img src={`https://www.nosdeputes.fr/depute/photo/${currentDepute.depute.slug}/60`} />
-                  : null
-                  
-                }
-
-                <div
-                  dangerouslySetInnerHTML={{
-                    __html: currentStepData.type === 'elocution' ? 
-                              currentStepData.intervention : `<i>${currentStepData.didascalie}</i>`
-                  }}
-                />
-              </div> : null
-            }
-
-            </Column>
+          </Column>
+          
         </Columns>
+        <TTip id="ttip" />
       </Container>
     );
   }

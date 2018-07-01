@@ -12,7 +12,8 @@ class RadarContainer extends Component {
         size: {
           width,
           // height
-        }
+        },
+        ...props
       }
     } = this;
 
@@ -23,7 +24,9 @@ class RadarContainer extends Component {
           data={data}
           width={width}
           height={height}
-          margin={{top: 10, bottom: 50, left: 50, right: 10}}/>
+          margin={{top: 10, bottom: 50, left: 50, right: 10}}
+          {...props}
+        />
       </div>
     )
   }

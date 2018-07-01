@@ -6,18 +6,6 @@ const extent = arrays.extent;
 const { withSize } = require('react-sizeme');
 const TTip = require('react-tooltip');
 
-const colors = {
-  'LREM': 'lightblue',
-  'MODEM': 'lightgrey',
-  'NG': 'pink',
-  'LR': 'blue',
-  'GDR': 'brown',
-  'UAI': 'blue',
-  'LFI': 'red',
-  'NI': 'yellow'
-}
-
-
 class Assemblee extends React.Component {
 
   render() {

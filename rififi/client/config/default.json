@@ -1,3 +1,25 @@
 {
-  "serverURL": "http://localhost:3001"
+  "urlPrefix": "",
+  "serverURL": "http://localhost:3001",
+  "eventsColors": {
+    "positif": "#71BF50",
+    "negatif": "#C00559",
+    "invective": "#D46934",
+    "neutre": "#F3CC4F",
+    "intervention": "#529DCB"
+  },
+  "statsVals": ["attaques_recues", "invectivite", "soutiens_recus", "mots_prononces"],
+  "parlementaryGroups": [
+    "MODEM",
+    "LREM",
+    "commission",
+    "gouvernement",
+    "présidence",
+    "UAI",
+    "NG",
+    "LR",  
+    "GDR",
+    "LFI",
+    "NI"
+  ]
 }

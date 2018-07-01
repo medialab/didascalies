@@ -13,13 +13,16 @@
     "react-d3-components": "^0.9.1",
     "react-d3-radar": "^0.2.6",
     "react-dom": "^16.4.1",
+    "react-markdown": "^3.3.4",
     "react-router-dom": "^4.3.1",
     "react-scripts": "1.1.4",
     "react-sizeme": "^2.5.2",
-    "react-tooltip": "^3.6.1"
+    "react-tooltip": "^3.6.1",
+    "tsne-js": "^1.0.3"
   },
   "scripts": {
-    "dev": "kotatsu serve --config ./webpack.config.dev.js --progress --babel --index ./index.html --public ./ ./src/index.js"
+    "dev": "kotatsu serve --config ./webpack.config.dev.js --progress --babel --index ./index.html --public ./ ./src/index.js",
+    "build": "kotatsu build client ./src/index.js -o build  --progress --config ./webpack.config.prod.js --babel"
   },
   "devDependencies": {
     "babel-core": "^6.17.0",
@@ -42,7 +45,8 @@
     "sass-loader": "^6.0.3",
     "style-loader": "^0.20.2",
     "uglifyjs-webpack-plugin": "^1.2.0",
-    "webpack-bundle-analyzer": "^2.11.1"
+    "webpack-bundle-analyzer": "^2.11.1",
+    "worker-loader": "^2.0.0"
   },
   "babel": {
     "plugins": [

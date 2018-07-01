@@ -10,6 +10,7 @@ class RadarContainer extends Component {
       props: {
         data,
         domainMax,
+        onHover,
         size: {
           width,
           // height
@@ -28,9 +29,13 @@ class RadarContainer extends Component {
                 highlighted={null}
                 onHover={(point) => {
                   if (point) {
-                    console.log('hovered over a data point');
+                    if (onHover) {
+                      onHover(point)
+                    }
                   } else {
-                    console.log('not over anything');
+                    if (onHover) {
+                      onHover(undefined)
+                    }
                   }
                 }}
                 data={data}

@@ -50,8 +50,8 @@ class DossierChrono extends React.Component {
           width={width}
           height={height}
           yAxis={{
-            label: "interruptions",
-            tickValues: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100],
+            label: "animation",
+            tickValues: [0, 10, 20, 30,  40, 50, 60, 70, 80, 90, 100],
             tickFormat: x => { return parseInt(x) + '%'; }
           }}
           

@@ -1,10 +1,14 @@
 import React, { Component } from 'react';
 
+import {Link} from 'react-router-dom';
+
 import {
+  Button,
   Hero,
   HeroBody,
   Container,
   Title,
+  Content
 } from 'bloomer';
 
 import {getFile} from '../utils/client';
@@ -84,7 +88,13 @@ export default class Home extends Component {
     } = this;
     
     return (
-      <Hero isFullHeight isColor='info' isSize='medium'>
+      <Hero isFullHeight isColor='info' isSize='medium' style={{
+        position: 'fixed',
+        left: 0,
+        top: 0,
+        width: '100%',
+        height: '100%',
+      }}>
         <HeroBody>
           <Background />
           {/*<div
@@ -99,10 +109,11 @@ export default class Home extends Component {
           />*/}
           <Container hasTextAlign='centered'>
               {
-                choosen.map(citation => {
+                choosen.map((citation, index) => {
                   
                   return (
                   <blockquote
+                    key={index}
                     style={{
                       position: 'fixed',
                       left: citation.left + '%',
@@ -113,6 +124,16 @@ export default class Home extends Component {
                 )})
               }
               <Title>Du Rififi à l'assemblée</Title>
+              <Content>
+                Une exploration des compte-rendus de séances de la XV<sup>ème</sup> législature.
+              </Content>
+              <div>
+                <Button isColor="primary">
+                  <Link to={'/liste'}>
+                    Commencer
+                  </Link>
+                </Button>
+              </div>
           </Container>
         </HeroBody>
       </Hero>
