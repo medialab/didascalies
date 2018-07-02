@@ -63,9 +63,9 @@ export default class Home extends Component {
             left += 10;
           }
         }
-        if (top > 40 && top < 70) {
+        if (top > 30 && top < 70) {
           if (top < 50) {
-            top -= 10;
+            top -= 20;
           } else {
             top += 20;
           }
@@ -114,6 +114,7 @@ export default class Home extends Component {
                   return (
                   <blockquote
                     key={index}
+                    className="citation"
                     style={{
                       position: 'fixed',
                       left: citation.left + '%',
@@ -123,16 +124,19 @@ export default class Home extends Component {
                   </blockquote>
                 )})
               }
-              <Title>Du Rififi à l'assemblée</Title>
-              <Content>
-                Une exploration des compte-rendus de séances de la XV<sup>ème</sup> législature.
-              </Content>
-              <div>
-                <Button isColor="primary">
-                  <Link to={'/liste'}>
-                    Commencer
-                  </Link>
-                </Button>
+              <div style={{background: 'rgba(0,0,0,0.05)', padding: '3rem'}}>
+                <Title className="big-title">Du Rififi à l'assemblée</Title>
+                <Content>
+                  Une exploration des compte-rendus de séances de la XV<sup>ème</sup> législature.
+                </Content>
+
+                <div>
+                  <Button isColor="primary">
+                    <Link to={'/liste'}>
+                      Commencer
+                    </Link>
+                  </Button>
+                </div>
               </div>
           </Container>
         </HeroBody>

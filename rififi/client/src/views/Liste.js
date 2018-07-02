@@ -128,7 +128,7 @@ export default class Liste extends Component {
       {
         key: 
         'circulation', 
-        label: 'Circulation parole',
+        label: 'Circulation de la parole',
       },
     ];
 
