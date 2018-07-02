@@ -45,7 +45,7 @@ class Counter extends React.Component {
       displayed
     } = this.state;
     return (
-      <i><time>{displayed}</time></i>
+      <i><time>{displayed > 0 ? displayed : 'patience'}</time></i>
     )
   }
 }
