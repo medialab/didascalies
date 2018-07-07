@@ -58,3 +58,21 @@ html{
   background: #f7f5ee;
 }
 
+.quote-enter {
+  opacity: 0.01;
+}
+
+.quote-enter.quote-enter-active {
+  opacity: 1;
+  transition: opacity 500ms ease-in;
+}
+
+.quote-leave {
+  opacity: 1;
+}
+
+.quote-leave.quote-leave-active {
+  opacity: 0.01;
+  transition: opacity 300ms ease-in;
+}
+

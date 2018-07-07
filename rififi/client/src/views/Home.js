@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 import {Link} from 'react-router-dom';
 
@@ -12,6 +13,11 @@ import {
 } from 'bloomer';
 
 import {getFile} from '../utils/client';
+
+const NB_ROWS = 3;
+const NB_LINES = 4;
+const NB_QUOTES = 4;
+const UPDATE_TIMEOUT = 5000;
 
 
 import Background from '../components/Background';
@@ -46,37 +52,64 @@ export default class Home extends Component {
     const {
       state: {
         invectives = [],
-        choosen : oldChoosen
+        // choosen : oldChoosen
       }
     } = this;
 
-    const choosen = [...oldChoosen];
+    const choosen = [];
+
+    let cells = [];
+    for (let i = 0 ; i < NB_LINES ; i++) {
+      const line = [];
+      for (let j = 0 ; j < NB_ROWS ; j++)
+        line.push(j);
+      cells.push(line);
+    }
 
     if (invectives.length) {
-      for (let i = 0 ; i < 5 ; i++) {
-        let left = 10 + Math.random() * 60;
-        let top = 10 + Math.random() * 60;
-        if (left > 40 && left < 60) {
-          if (left < 50) {
-            left -= 10;
-          } else {
-            left += 10;
-          }
-        }
-        if (top > 30 && top < 70) {
-          if (top < 50) {
-            top -= 20;
-          } else {
-            top += 20;
-          }
-        }
+      for (let i = 0 ; i < NB_QUOTES ; i++) {
+        let coords;
+        let lineI;
+        do {
+          lineI = parseInt(Math.random() * cells.length);
+          if (cells[lineI].length)
+            continue;
+        } while (cells.length && cells[lineI].length === 0);
+        let line = cells[lineI];
+
+        let rowI;
+        do {
+          rowI = parseInt(Math.random() * line.length);
+        } while (choosen.find(c => c.lineI === lineI && c.rowI === rowI) !== undefined);
+        
+        let row = line[rowI];
+
+        const already = choosen.find(c => c.lineI === lineI && c.rowI === rowI);
+        if (already) console.log('oupsy', rowI, lineI,);
+
+        cells[lineI].splice(rowI, 1);
+
+        const inTop = i > NB_QUOTES/2;
+
+        const yDisplace = inTop ? 10 : 70;
+
+        let left = row * (90/NB_ROWS);
+        let top = lineI * (20/NB_LINES) + yDisplace;
+        
+
         const invective = invectives[parseInt(Math.random() * invectives.length)];
-        choosen.push({top, left, invective})
+        choosen.push({top, lineI, rowI, left, invective})
       }
     }
     this.setState({
       choosen
-    })
+    });
+    setTimeout(() => {
+      this.setState({
+        choosen: []
+      });
+      setTimeout(this.updateChoosen, UPDATE_TIMEOUT/2)
+    }, UPDATE_TIMEOUT/2)
   }
 
   render = () => {
@@ -108,9 +141,13 @@ export default class Home extends Component {
             }}
           />*/}
           <Container hasTextAlign='centered'>
+              <ReactCSSTransitionGroup
+                transitionName="quote"
+                transitionEnterTimeout={500}
+                transitionLeaveTimeout={300}>
+
               {
                 choosen.map((citation, index) => {
-                  
                   return (
                   <blockquote
                     key={index}
@@ -119,11 +156,14 @@ export default class Home extends Component {
                       position: 'fixed',
                       left: citation.left + '%',
                       top: citation.top + '%',
+                      width: (90/NB_ROWS) + '%'
+
                     }}>
                     {citation.invective}
                   </blockquote>
                 )})
               }
+              </ReactCSSTransitionGroup>
               <div style={{background: 'rgba(0,0,0,0.05)', padding: '3rem'}}>
                 <Title className="big-title">Du Rififi à l'assemblée</Title>
                 <Content>
