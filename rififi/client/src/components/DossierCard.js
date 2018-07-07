@@ -46,7 +46,7 @@ class DossierCard extends React.Component {
                     <CardHeader>
                         <CardHeaderTitle>
                             <Title>
-                             <Link to={`/dossier/${dossier.id}`}> {dossier.nom}</Link>
+                              <Link to={`/dossier/${dossier.id}`}> {dossier.nom}</Link>
                             </Title>
                         </CardHeaderTitle>
                     </CardHeader>
@@ -76,8 +76,8 @@ class DossierCard extends React.Component {
                           width={width * .9}
                           height={height}
                           yAxis={{
-                            label: "activité",
-                            tickValues: [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100],
+                            label: "animation",
+                            tickValues: [0, 20, 40,60, 80, 100],
                             tickFormat: x => { return parseInt(x) + '%'; }
                           }}
                           

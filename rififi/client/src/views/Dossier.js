@@ -191,7 +191,9 @@ class App extends Component {
     const scaleNeg = scaleLinear().domain(extent(dossiersList, d => (d.nb_interruptions_negatives + d.nb_didasc_negatives) / d.nb_mots)).range([0, 1]);
     const scaleRires = scaleLinear().domain(extent(dossiersList, d => d.nb_rires / d.nb_mots)).range([0, 1]);
     const scaleMurmures = scaleLinear().domain(extent(dossiersList, d => d.nb_murmures / d.nb_mots)).range([0, 1]);
-    const scaleCirculation = scaleLinear().domain(extent(dossiersList, d => d.nb_orateurs / d.nb_interv)).range([0, 1]);
+    // const scaleCirculation = scaleLinear().domain(extent(dossiersList, d => d.nb_orateurs / d.nb_interv)).range([0, 1]);
+    const scaleInterruptions = scaleLinear().domain(extent(dossiersList, d => d.pc_interruptions)).range([0, 1]);
+    
     const radarVariables = [
       {
         key: 'pct_soutien', 
@@ -212,10 +214,15 @@ class App extends Component {
         key: 'pct_agression', 
         label: 'Réactions d\'agression',
       },
+      // {
+      //   key: 
+      //   'circulation', 
+      //   label: 'Circulation parole',
+      // },
       {
         key: 
-        'circulation', 
-        label: 'Circulation parole',
+        'interruptions', 
+        label: 'Taux d\'animation',
       },
     ];
 
@@ -231,7 +238,8 @@ class App extends Component {
             pct_agression: scaleNeg((d.nb_didasc_negatives + d.nb_interruptions_negatives) / d.nb_mots),
             rires: scaleRires(d.nb_rires / d.nb_mots),
             murmures: scaleMurmures(d.nb_murmures / d.nb_mots),
-            circulation: scaleCirculation(d.nb_orateurs / d.nb_interv),
+            // circulation: scaleCirculation(d.nb_orateurs / d.nb_interv),
+            interruptions: scaleInterruptions(d.pc_interruptions),
           }
         }
       })

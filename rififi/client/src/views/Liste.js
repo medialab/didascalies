@@ -62,7 +62,7 @@ export default class Liste extends Component {
           }
           return -1;
         case 'hilarite':
-          if (a.nb_rires < b.nb_rires) {
+          if (a.nb_rires / a.nb_mots < b.nb_rires / b.nb_mots) {
             return 1;
           }
           return -1;
@@ -104,7 +104,8 @@ export default class Liste extends Component {
     const scaleNeg = scaleLinear().domain(extent(dossiersList, d => (d.nb_interruptions_negatives + d.nb_didasc_negatives) / d.nb_mots)).range([0, 1]);
     const scaleRires = scaleLinear().domain(extent(dossiersList, d => d.nb_rires / d.nb_mots)).range([0, 1]);
     const scaleMurmures = scaleLinear().domain(extent(dossiersList, d => d.nb_murmures / d.nb_mots)).range([0, 1]);
-    const scaleCirculation = scaleLinear().domain(extent(dossiersList, d => d.nb_orateurs / d.nb_interv)).range([0, 1]);
+    // const scaleCirculation = scaleLinear().domain(extent(dossiersList, d => d.nb_orateurs / d.nb_interv)).range([0, 1]);
+    const scaleInterruptions = scaleLinear().domain(extent(dossiersList, d => d.pc_interruptions)).range([0, 1]);
     const radarVariables = [
       {
         key: 'pct_soutien', 
@@ -127,9 +128,14 @@ export default class Liste extends Component {
       },
       {
         key: 
-        'circulation', 
-        label: 'Circulation de la parole',
+        'interruptions', 
+        label: 'Taux d\'animation',
       },
+      // {
+      //   key: 
+      //   'circulation', 
+      //   label: 'Circulation de la parole',
+      // },
     ];
 
     const radarData = {
@@ -150,7 +156,8 @@ export default class Liste extends Component {
             pct_agression: scaleNeg((d.nb_didasc_negatives + d.nb_interruptions_negatives) / d.nb_mots),
             rires: scaleRires(d.nb_rires / d.nb_mots),
             murmures: scaleMurmures(d.nb_murmures / d.nb_mots),
-            circulation: scaleCirculation(d.nb_orateurs / d.nb_interv),
+            // circulation: scaleCirculation(d.nb_orateurs / d.nb_interv),
+            interruptions: scaleInterruptions(d.pc_interruptions),
           }
         }
       })
@@ -216,6 +223,7 @@ export default class Liste extends Component {
                 domainMax={1} 
                 data={radarData} 
                 highlighted={highlightedDossier}
+                onHover={onRadarHover}
               />
              {highlightedDossier && <Button onClick={() => onRadarHover(undefined)}>
                   Réinitialiser
