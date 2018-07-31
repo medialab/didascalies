@@ -11,26 +11,39 @@
 ## Pistes d'indicateurs:
 
 - Réactions positives : 
-  Applaudissements 
-  Interruptions de type "Très bien !"
+  + Applaudissements 
+  + Interruptions de type "Très bien !"
 
 - Réactions négatives :
-  Claquement de pupitres
-  Exclamations 
-  Autre types d'interruptions
-  Brouhaha
-  Murmures
+  + Claquement de pupitres
+  + Exclamations 
+  + Autre types d'interruptions
+  + Brouhaha
+  + Murmures
 
 - Réactions neutres :
 
 
 - Hilarité :
-  Rires et sourires
+  + Rires et sourires
 
 - Circulations de la parole :
 
 - Agitation :
-  Identifier les rappels au réglement
-  Nbre de coupure sur nombre d'interventions
-  Durée de suspension de séances - quelle proportion de la séance n'a pas eu lieu 
+  + Identifier les rappels au réglement
+  + Nbre de coupure sur nombre d'interventions
+  + Durée de suspension de séances - quelle proportion de la séance n'a pas eu lieu 
 
+
+## Angles:
+
+- Débats
+  + projet de loi
+  + questions
+  + autres
+
+- Personnes
+  + députés individuels (ancienneté, groupe, sexe, âge, background socioculturel (si opérationalisable
+proprement) – profession recodé en ordinal ou CSP (Catégorie socio-professionnelle)...)
+  + ministres
+  + groupes politiques
